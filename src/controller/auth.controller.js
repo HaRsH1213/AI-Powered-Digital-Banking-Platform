@@ -20,7 +20,7 @@ async function registerUserController (req, res){
         email, name, password
     })
 
-    const token = await jwt.sign({id:user._id},process.env.JWT_SECRET, {expiresIn:3})
+    const token = await jwt.sign({id:user._id},process.env.JWT_SECRET, {expiresIn:"3d"})
     res.cookie('token', token)
 
     res.status(201).json({
@@ -36,5 +36,41 @@ async function registerUserController (req, res){
 
 
 }
+/**
+ * - User Login Controller
+ * - POST /api/auth/Login
+ */
 
-module.exports = {registerUserController}
+async function loginUserController(req, res){
+    const {email, password} = req.body
+
+    const user = await userModel.findOne({email:email}).select("+password")
+
+    if(!user){
+        return res.status(401).json({
+            message: "Invalid Email or Password"
+        })
+    }
+    const isCorrectPassword = await user.comparePassword(password)
+
+    if(!isCorrectPassword){
+        return res.status(401).json({
+            message: "Invalid Email or Password"
+        })
+    }
+    const token = await jwt.sign({id: user._id},process.env.JWT_SECRET,{expiresIn:"3d"})
+
+    res.cookie("token",token)
+    res.status(200).json({
+        message: "User Login Successfully",
+        user :{
+            _id : user._id,
+            name: user.name,
+            email: user.email
+
+        },
+        token
+    })
+}
+
+module.exports = {registerUserController, loginUserController}
