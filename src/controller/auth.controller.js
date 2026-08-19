@@ -21,7 +21,7 @@ async function registerUserController (req, res){
         email, name, password
     })
 
-    const token = await jwt.sign({id:user._id},process.env.JWT_SECRET, {expiresIn:"3d"})
+    const token = await jwt.sign({userId:user._id},process.env.JWT_SECRET, {expiresIn:"3d"})
     res.cookie('token', token)
 
     res.status(201).json({
@@ -61,7 +61,7 @@ async function loginUserController(req, res){
             message: "Invalid Email or Password"
         })
     }
-    const token = await jwt.sign({id: user._id},process.env.JWT_SECRET,{expiresIn:"3d"})
+    const token = await jwt.sign({userId: user._id},process.env.JWT_SECRET,{expiresIn:"3d"})
 
     res.cookie("token",token)
     res.status(200).json({
