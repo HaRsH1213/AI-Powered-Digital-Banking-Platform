@@ -34,9 +34,10 @@ async function createTransaction (req, res){
 
     }
     const fromUserAccount = await accountModel.findOne({
-        _id: fromAccount
+        _id: fromAccount,
+        user: req.user._id
     })
-    const toUserAccount = await accountModel.find({
+    const toUserAccount = await accountModel.findOne({
         _id: toAccount
     })
 
@@ -95,47 +96,80 @@ async function createTransaction (req, res){
     */
 
 
-    const userBalance = await accountModel.getBalance()
-    if(balance < amount){
+    const userBalance = await fromUserAccount.getBalance()
+    if(userBalance < amount){
     return res.status(400).json({
-        message: `Insufficient balance. Current balance is ${balance} and Requested Amount is ${amount} `
+        message: `Insufficient balance. Current balance is ${userBalance} and Requested Amount is ${amount} `
     })
     }
 
 
     /**
-    *4. Derive sender balance from ledger
+    *4. Transaction Steps
     */
 
-    const session = await mongoose.startSession()
-    session.startTransaction()
-
-    const transaction = await transactionModel.create({
+    // 1. Create PENDING transaction
+    const transactionResult = await transactionModel.create([{
         fromAccount,
         toAccount,
         amount,
         idempotencyKey,
         status: "PENDING"
-    },{session})
-    const debitLedger = await ledgerModel.create({
-        account: fromAccount,
-        amount: amount,
-        transaction: transaction._id,
-        type: "DEBIT"
-    },{session})
-    const creditLedger = await ledgerModel.create({
-        account: toAccount,
-        amount: amount,
-        transaction: transaction._id,
-        type: "CREDIT"
-    },{session})
+    }])
+
+    const transaction = transactionResult[0]
 
 
-    transaction.status = "COMPLETED"
-    await transaction.save({session})
+    // 3. Start atomic money movement
+    const session = await mongoose.startSession()
 
-    await session.commitTransaction()
-    session.endSession()
+    try {
+        session.startTransaction()
+
+        // DEBIT
+        await ledgerModel.create([{
+            account: fromAccount,
+            amount,
+            transaction: transaction._id,
+            type: "DEBIT"
+        }], { session })
+
+
+        // Simulate processing delay
+
+        // await new Promise((resolve) => {
+        //     setTimeout(resolve, 10000)
+        // })
+
+        // CREDIT
+        await ledgerModel.create([{
+            account: toAccount,
+            amount,
+            transaction: transaction._id,
+            type: "CREDIT"
+        }], { session })
+
+        // COMPLETED
+        transaction.status = "COMPLETED"
+        await transaction.save({ session })
+
+        await session.commitTransaction()
+
+    } catch (error) {
+
+        await session.abortTransaction()
+
+        transaction.status = "FAILED"
+        await transaction.save()
+
+        return res.status(500).json({
+            message: "Transaction failed",
+            transaction
+        })
+
+    } finally {
+        await session.endSession()
+    }
 
 
     /**
