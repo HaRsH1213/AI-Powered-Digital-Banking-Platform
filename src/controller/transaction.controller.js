@@ -92,7 +92,7 @@ async function createTransaction (req, res){
     
     
     /**
-    *4. Derive sender balance from ledger
+    *4. Derive sender balance from ledger entry
     */
 
 
