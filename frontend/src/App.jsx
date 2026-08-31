@@ -1,10 +1,6 @@
-import LoginPage from "./pages/loginPage"
+import DashboardPage from './pages/DashboardPage'
 
 
-const App = () => {
-  return (
-    <LoginPage/>
-  )
-}
+const App = () => <DashboardPage />
 
 export default App
