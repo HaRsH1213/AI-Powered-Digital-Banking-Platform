@@ -2,6 +2,7 @@ import { useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import Sidebar from '../components/Sidebar'
 import DashboardHeader from '../components/DashboardHeader'
+import BalanceCard from '../components/BalanceCard'
 
 const DashboardPage = () => {
   const [navIndex, setNavIndex] = useState(0)
@@ -21,6 +22,7 @@ const DashboardPage = () => {
       <section  className='min-w-0 p-4 sm:p-6 lg:p-10'>
         {/* dashboard content will go here */}
         <DashboardHeader menuOpen = {menuOpen} setMenuOpen ={setMenuOpen} />
+        <BalanceCard/>
       </section>
     </DashboardLayout>
   )
