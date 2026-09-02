@@ -7,6 +7,7 @@ import PrimaryAccountCard from '../components/accounts/PrimaryAccountCard'
 import SalaryAccountCard from '../components/accounts/SalaryAccountCard'
 import EmergencyAccountCard from '../components/accounts/EmergencyAccountCard'
 import QuickActions from '../components/QuickActions'
+import LoanCard from '../components/LoanCard'
 
 const DashboardPage = () => {
 
@@ -49,6 +50,7 @@ const DashboardPage = () => {
           })}
         </div>
         <QuickActions/>
+        <LoanCard/>
       </section>
     </DashboardLayout>
   )
