@@ -7,6 +7,7 @@ const DashboardHeader = ({menuOpen, setMenuOpen}) => {
           <button
             type="button" 
             onClick={()=> setMenuOpen(prev => !prev)}
+            aria-expanded={menuOpen}
             className="px-3 py-2 border border-slate-700 rounded-lg lg:hidden "
             aria-label="toggle-navigation">
         
