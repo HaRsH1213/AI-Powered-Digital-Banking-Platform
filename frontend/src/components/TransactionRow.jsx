@@ -1,7 +1,8 @@
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react"
-const TransactionRow = ({transaction}) => {
+const TransactionRow = ({transaction, setSelected}) => {
   return (
-    <button className="text-left w-full flex items-center border-b border-slate-800 gap-4 px-4 py-4 transition hover:bg-slate-800/60 hover:cursor-pointer sm:px-6">
+    <button onClick={() => setSelected(transaction)}
+      className="text-left w-full flex items-center border-b border-slate-800 gap-4 px-4 py-4 transition hover:bg-slate-800/60 hover:cursor-pointer sm:px-6">
       {/* Trasaction Type Logo */}
       <span className= {`grid w-12 h-12 place-items-center rounded-full ${
         transaction.income
@@ -10,8 +11,8 @@ const TransactionRow = ({transaction}) => {
       }`
       }>
         {transaction.income
-        ? <ArrowUpRight size={18}/>
-        : <ArrowDownLeft size={18}/>
+        ? <ArrowDownLeft size={18}/>
+        : <ArrowUpRight size={18}/>
         }
       </span>
 

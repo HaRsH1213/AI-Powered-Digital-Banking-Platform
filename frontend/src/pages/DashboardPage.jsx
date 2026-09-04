@@ -11,6 +11,7 @@ import LoanCard from '../components/LoanCard'
 import RecentTransactions from '../components/RecentTransactions'
 import { transactionData } from '../data/transactions'
 import TransactionRow from '../components/TransactionRow'
+import TransactionList from '../components/TransactionList'
 
 const DashboardPage = () => {
 
@@ -19,13 +20,13 @@ const DashboardPage = () => {
   { name: 'Salary Account', type: 'Current', number: '•••• 7734', balance: '₹52,000.00', color: 'bg-emerald-500/15 text-emerald-300', icon: '▣' },
   { name: 'Emergency Fund', type: 'Savings', number: '•••• 1190', balance: '₹24,250.00', color: 'bg-purple-500/15 text-purple-300', icon: '♢' },
   ]
-  const sampleTransaction = {
-  id: 'TXN-20260828-001',
-  name: 'UPI_CRADJ_U2_TDT_270826',
-  date: '28 Aug 2026, 07:12 pm',
-  amount: '+₹1',
-  income: true,
-  }
+  // const sampleTransaction = {
+  // id: 'TXN-20260828-001',
+  // name: 'UPI_CRADJ_U2_TDT_270826',
+  // date: '28 Aug 2026, 07:12 pm',
+  // amount: '+₹1',
+  // income: true,
+  // }
   const [navIndex, setNavIndex] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   return (
@@ -60,7 +61,10 @@ const DashboardPage = () => {
         </div>
         <QuickActions/>
         <LoanCard/>
-        <TransactionRow transaction={sampleTransaction}/>
+        {/* <TransactionRow transaction={sampleTransaction}/> */}
+        {/* <TransactionList transactions={transactionData}/> */}
+        <RecentTransactions transactions={transactionData}/>
+        
       </section>
     </DashboardLayout>
   )
