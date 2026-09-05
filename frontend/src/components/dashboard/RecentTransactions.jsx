@@ -1,6 +1,6 @@
 import { useState } from "react"
-import TransactionRow from "./TransactionRow"
-import TransactionDetailsModal from "./TransactionDetailsModal"
+import TransactionRow from "../transactions/TransactionRow"
+import TransactionDetailsModal from "../transactions/TransactionDetailsModal"
 
 const RecentTransactions = ({transactions}) => {
   const [selected, setSelected] = useState(null)
