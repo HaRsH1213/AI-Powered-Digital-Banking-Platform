@@ -2,6 +2,7 @@ import { ArrowDownLeft, ArrowUpRight } from "lucide-react"
 const TransactionRow = ({transaction, setSelected}) => {
   return (
     <button onClick={() => setSelected(transaction)}
+      type="button"
       className="text-left w-full flex items-center border-b border-slate-800 gap-4 px-4 py-4 transition hover:bg-slate-800/60 hover:cursor-pointer sm:px-6">
       {/* Trasaction Type Logo */}
       <span className= {`grid w-12 h-12 place-items-center rounded-full ${

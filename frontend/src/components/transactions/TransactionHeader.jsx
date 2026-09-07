@@ -1,16 +1,19 @@
-import { ArrowLeft, Download, Filter, Search,Menu  } from "lucide-react"
+import { ArrowLeft, Filter, Menu  } from "lucide-react"
 const TransactionHeader = ({setMenuOpen}) => {
   return (
     <header>
       <div className="flex justify-between items-center">
         <div className=" flex items-center gap-3">
           <button onClick={()=>setMenuOpen(open => !open)}
+            type="button"
             className="rounded-lg border border-slate-700 px-3 py-2 lg:hidden">
 
             <Menu size={18} />
 
           </button>
-          <button className="hidden text-slate-400 hover:text-white sm:block ">
+          <button
+            type="button"
+            className="hidden text-slate-400 hover:text-white sm:block ">
 
             <ArrowLeft size={18} />
 
@@ -26,7 +29,9 @@ const TransactionHeader = ({setMenuOpen}) => {
         </div>
 
 
-        <button className=" border rounded-lg border-slate-700 text-slate-300 px-3 py-2 ">
+        <button 
+          type="button"
+          className=" border rounded-lg border-slate-700 text-slate-300 px-3 py-2 ">
 
           <Filter size={18} />
 

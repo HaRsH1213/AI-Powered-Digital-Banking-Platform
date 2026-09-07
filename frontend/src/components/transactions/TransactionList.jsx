@@ -1,6 +1,6 @@
 import TransactionRow from "./TransactionRow"
 
-const TransactionList = ({transactions}) => {
+const TransactionList = ({transactions ,setSelected}) => {
   const grouped = transactions.reduce((groups, transaction)=>{
     groups[transaction.month] =[...(groups[transaction.month] || [] ), transaction,]
     return groups  
@@ -10,7 +10,7 @@ const TransactionList = ({transactions}) => {
 
   return ( 
     <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden ">
-      {console.log(Object.entries(grouped))}
+      {/* {console.log(Object.entries(grouped))} */}
       
 
       {Object.entries(grouped).map(([month, items])=>(
@@ -23,6 +23,7 @@ const TransactionList = ({transactions}) => {
             <TransactionRow
               key={transaction.id}
               transaction={transaction}
+              setSelected={setSelected}
             />
           ))}
 

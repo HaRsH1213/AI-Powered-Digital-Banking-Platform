@@ -3,6 +3,10 @@ import DashboardLayout from "../components/dashboard/DashboardLayout"
 import { useState } from "react"
 import TransactionHeader from "../components/transactions/TransactionHeader"
 import TransactionFilters from "../components/transactions/TransactionFilters"
+import TransactionList from "../components/transactions/TransactionList"
+import { transactionData } from "../data/transactions"
+import TransactionDetailsModal from "../components/transactions/TransactionDetailsModal"
+// import {Download} from "lucide-react"
 
 
 const TransactionsPage = () => {
@@ -11,6 +15,28 @@ const TransactionsPage = () => {
 
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("All")
+
+  const [selected, setSelected] = useState(null)
+
+
+  const filterTransactions = transactionData.filter((transaction)=>{
+    const query = search.toLowerCase().trim()
+
+    // Search by Name, Amount, or Transaction ID
+
+    const matchesSearch = !query || 
+    transaction.name.toLowerCase().trim().includes(query) || 
+    transaction.amount.toLowerCase().trim().includes(query)||
+    transaction.id.toLowerCase().trim().includes(query)
+
+     // Filter by Transaction Type
+    const matchesFilter = filter === "All" ||( filter === "Credit" && transaction.income) || (filter === "Debit" && !transaction.income)
+
+
+
+    return matchesFilter && matchesSearch
+
+  })
   return (
     <DashboardLayout>
       <Sidebar menuOpen={menuOpen} navIndex = {navIndex} setNavIndex = {setNavIndex} />
@@ -24,6 +50,33 @@ const TransactionsPage = () => {
       <section className="min-w-0 p-4 sm:p-6 lg:p-10">
         <TransactionHeader setMenuOpen={setMenuOpen}  />
         <TransactionFilters search={search} setSearch={setSearch} filter={filter} setFilter={setFilter}  />
+
+        {/* Transactions List */}
+        <div className=" mt-6">
+
+          {filterTransactions.length === 0 ? (
+            <p className="p-6 text-center text-slate-400">
+              No transactions found.
+            </p>
+          ) : (
+            <TransactionList
+              transactions={filterTransactions}
+              setSelected={setSelected}
+            />
+          )}
+
+
+        </div>
+
+        <TransactionDetailsModal transaction={selected} onClose={() => setSelected(null)} />
+          
+        {/* <button
+          type="button"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-blue-400 sm:ml-auto sm:w-auto"
+        >
+          <Download size={18} />
+          Download statement
+        </button> */}
 
       </section>
 

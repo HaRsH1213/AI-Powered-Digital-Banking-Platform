@@ -41,7 +41,7 @@ const DashboardPage = () => {
       )}
       <section  className='min-w-0 p-4 sm:p-6 lg:p-10'>
         {/* dashboard content will go here */}
-        <DashboardHeader menuOpen = {menuOpen} setMenuOpen ={setMenuOpen} />
+        <DashboardHeader menuOpen = {menuOpen} setMenuOpen ={setMenuOpen} title='Your money, clearly managed' subtitle='Welcome Back, Harsh' />
 
         <BalanceCard/>
 

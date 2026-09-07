@@ -1,7 +1,7 @@
 import { Bell } from "lucide-react";
-const DashboardHeader = ({menuOpen, setMenuOpen}) => {
+const DashboardHeader = ({ menuOpen, setMenuOpen, title = 'Your money, clearly managed.', subtitle = 'Welcome Back, Harsh' }) => {
   return (
-    <header className=" mb-8">
+    <header className="mb-8 ">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
@@ -52,13 +52,13 @@ const DashboardHeader = ({menuOpen, setMenuOpen}) => {
       <div className="mt-5 lg:mt-0">
         <p className="text-sm text-slate-400 ">
 
-          Welcome Back, Harsh
+          {subtitle}
 
         </p>
 
         <h1 className=" text-3xl mt-1 font-semibold sm:text-4xl leading-tight">
 
-          Your money, clearly managed. 
+          {title}
           
         </h1>
       </div>

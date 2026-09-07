@@ -1,8 +1,6 @@
-import DashboardPage from "./pages/DashboardPage"
-import TransactionsPage from "./pages/TransactionsPage"
+import AccountsPage from './pages/AccountsPage'
 const App = () => {
-  return <TransactionsPage/>
-        
+  return <AccountsPage/>
 }
 
 export default App
