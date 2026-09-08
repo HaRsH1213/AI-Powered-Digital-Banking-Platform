@@ -1,1 +1,35 @@
-export const accounts = []
+export const accounts = [
+  {
+    id: 'primary-savings',
+    name: 'Primary Savings',
+    number: '•••• 4821',
+    balance: '₹48,250.00',
+    type: 'Savings',
+    kind: 'savings',
+    status: 'Active',
+    ifsc: 'NOVA0001284',
+    openedDate: '12 Mar 2021',
+  },
+  {
+    id: 'salary-account',
+    name: 'Salary Account',
+    number: '•••• 7734',
+    balance: '₹52,000.00',
+    type: 'Current',
+    kind: 'salary',
+    status: 'Active',
+    ifsc: 'NOVA0001285',
+    openedDate: '08 Jun 2022',
+  },
+  {
+    id: 'emergency-fund',
+    name: 'Emergency Fund',
+    number: '•••• 1190',
+    balance: '₹24,250.00',
+    type: 'Savings',
+    kind: 'emergency',
+    status: 'Active',
+    ifsc: 'NOVA0001286',
+    openedDate: '21 Jan 2024',
+  },
+]
