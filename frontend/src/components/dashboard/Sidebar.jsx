@@ -1,4 +1,13 @@
-const Sidebar = ({menuOpen,navIndex, setNavIndex}) => {
+import { NavLink  } from 'react-router-dom'
+import {Landmark, Banknote, LayoutDashboard, Settings, WalletCards} from 'lucide-react'
+
+const Sidebar = ({menuOpen, setMenuOpen }) => {
+  const navItems = [
+    {label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
+    {label: "Accounts", icon: WalletCards, path: "/accounts"},
+    {label: "Transactions", icon: Banknote, path: "/transactions"},
+    {label: "Suuport", icon: Settings, path: "/support"}
+  ]
   return (
     <aside className={`absolute inset-y-0 left-0 z-20  w-[250px] p-8 border-r border-slate-800 bg-slate-900 transition-transform lg:static lg:block lg:w-auto lg:translate-x-0 
     ${menuOpen 
@@ -9,7 +18,7 @@ const Sidebar = ({menuOpen,navIndex, setNavIndex}) => {
       <div className=" flex items-center gap-3 text-xl font-semibold ">
 
         <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-500 text-slate-950">
-        ▥
+        <Landmark size={18}/>
         </span>
         NovaBank 
       </div>
@@ -18,33 +27,27 @@ const Sidebar = ({menuOpen,navIndex, setNavIndex}) => {
       <nav className="mt-12">
 
         {
-        [
-        "Overview",
-        "Accounts",
-        "Transfers",
-        "Transactions",
-        "Loans",
-        "Settings"
-        ].map((item, index)=>(
-          <button
-          onClick={()=>{
-            setNavIndex(index)
-          }}
-          key={item}
-          type="button" 
-          className={`flex w-full items-center gap-3 rounded-xl px-4 py-2 mt-1 text-left text-sm hover:cursor-pointer transition ${
-            index === navIndex
-              ? "bg-blue-500/15 text-blue-300"
-              : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-          }`}  >
+        navItems.map((item)=>(
+          <NavLink
+            key={item.path}
+            to={item.path}
+          
+            onClick={()=>{
+              setMenuOpen(false)
+            }} 
+            className={({isActive}) => `flex w-full items-center gap-3 rounded-xl px-4 py-2 mt-1 text-left text-sm hover:cursor-pointer transition ${
+              isActive
+                ? "bg-blue-500/15 text-blue-300"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            }`}  >
 
-          <span className="w-5 text-center">
-            {["⌂", "▣", "↗", "◷", "▱", "⚙"][index]}
-          </span>
+            <span className="w-5 text-center">
+              <item.icon size={18} />
+            </span>
 
 
-            {item}
-          </button>
+            {item.label}
+          </NavLink>
         ))
         
         }

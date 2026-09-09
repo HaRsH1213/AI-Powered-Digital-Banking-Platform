@@ -10,7 +10,6 @@ import TransactionDetailsModal from "../components/transactions/TransactionDetai
 
 
 const TransactionsPage = () => {
-  const [navIndex, setNavIndex] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
   const [search, setSearch] = useState("")
@@ -39,7 +38,7 @@ const TransactionsPage = () => {
   })
   return (
     <DashboardLayout>
-      <Sidebar menuOpen={menuOpen} navIndex = {navIndex} setNavIndex = {setNavIndex} />
+      <Sidebar menuOpen={menuOpen} setMenuOpen  = {setMenuOpen } />
       {menuOpen &&(
         <div onClick={() => setMenuOpen(false)}
           className="fixed inset-0 z-10 bg-black/50 lg:hidden">

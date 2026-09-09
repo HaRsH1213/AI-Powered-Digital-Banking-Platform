@@ -1,8 +1,9 @@
+import {Landmark} from "lucide-react"
 const AuthBrandPanel = () => {
   return (
     <section className="flex flex-col justify-between bg-linear-to-br from-blue-800 to-cyan-700 h-full p-8 sm:p-12 ">
       <div className="flex items-center gap-3 text-lg font-semibold">
-        <span>▥</span>
+        <span><Landmark size={18}/></span>
         Bank
       </div>
 

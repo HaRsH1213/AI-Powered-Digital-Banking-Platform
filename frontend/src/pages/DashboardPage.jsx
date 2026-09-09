@@ -25,13 +25,12 @@ const DashboardPage = () => {
   // amount: '+₹1',
   // income: true,
   // }
-  const [navIndex, setNavIndex] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   return (
     <DashboardLayout>
 
 
-      <Sidebar menuOpen = {menuOpen} navIndex = {navIndex} setNavIndex = {setNavIndex}/>
+      <Sidebar menuOpen = {menuOpen} setMenuOpen  = {setMenuOpen }/>
       
       {menuOpen && (
         <div onClick={() => setMenuOpen(false)}
@@ -41,7 +40,21 @@ const DashboardPage = () => {
       )}
       <section  className='min-w-0 p-4 sm:p-6 lg:p-10'>
         {/* dashboard content will go here */}
-        <DashboardHeader menuOpen = {menuOpen} setMenuOpen ={setMenuOpen} title='Your money, clearly managed' subtitle='Welcome Back, Harsh' />
+        <DashboardHeader menuOpen = {menuOpen} setMenuOpen ={setMenuOpen} />
+
+        <div className="mt-5 mb-8 lg:mt-0">
+        <p className="text-sm text-slate-400 ">
+
+          Welcome Back, Harsh
+
+        </p>
+
+        <h1 className=" text-3xl mt-1 font-semibold sm:text-4xl leading-tight">
+
+          Your money, clearly managed
+          
+        </h1>
+      </div>
 
         <BalanceCard/>
 

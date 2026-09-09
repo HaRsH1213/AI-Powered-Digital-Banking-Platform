@@ -1,16 +1,23 @@
 import { useState } from "react"
-import api from "../services/api"
+import api from "/src/services/api"
+import {useNavigate } from "react-router-dom"
+import LoadingOverlay from "./LoadingOverlay"
 
 const LoginForm = ({accountType}) => {
+  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   const submitHandler = async (e)=>{
     e.preventDefault()
+    setIsLoading(true)
     try{
       const response = await api.post("/auth/login", {email, password})
       console.log(response.data)
       alert('Login successful')
+      navigate("/dashboard", { replace: true })
+      
     }catch(error){
       console.log(error);
       alert(error.response?.data?.message || "Login Failed")
@@ -22,6 +29,7 @@ const LoginForm = ({accountType}) => {
   }
   return (
     <div className="mt-8">
+      {isLoading && <LoadingOverlay/>}
       <div>
         <h2 className=" text-3xl font-semibold mb-2">
           {accountType === "admin" ? "Admin Sign in" : "Welcome Back"}

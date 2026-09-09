@@ -12,7 +12,6 @@ const AccountsPage = () => {
 
   // Sidebar State
   const [menuOpen, setMenuOpen] = useState(false)
-  const [navIndex, setNavIndex] = useState(1)
 
   // Selected Account Id by clicking AccountTypeTabs
   const [selectedAccountId, setSelectedAccountId] = useState(accounts[0].id)
@@ -22,7 +21,7 @@ const AccountsPage = () => {
   const selectedAccount = accounts.find((account)=> selectedAccountId === account.id) || accounts[0]
   return (
     <DashboardLayout>
-      <Sidebar menuOpen={menuOpen} navIndex={navIndex} setNavIndex={setNavIndex} />
+      <Sidebar menuOpen={menuOpen} setMenuOpen ={setMenuOpen } />
 
       {menuOpen && (
         <div onClick={()=>setMenuOpen(false)}
@@ -32,7 +31,22 @@ const AccountsPage = () => {
       )}
       <section className="p-4 sm:p-6 lg:p-10 min-w-0">
 
-        <DashboardHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} title="Accounts" subtitle="Manage and review all your NovaBank accounts in one place" />
+        <DashboardHeader menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+        <div className="mt-5 lg:mt-0">
+
+          <h1 className=" text-3xl mt-1 font-semibold sm:text-4xl leading-tight">
+
+          Your Accounts
+          
+        </h1>
+        
+          <p className="mt-1 text-sm text-slate-400 ">
+
+            Manage and review all your NovaBank accounts in one place
+
+          </p>
+
+      </div>
 
         <main className="mt-8">
 
