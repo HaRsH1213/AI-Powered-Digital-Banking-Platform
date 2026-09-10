@@ -9,7 +9,7 @@ const Sidebar = ({menuOpen, setMenuOpen }) => {
     {label: "Suuport", icon: Settings, path: "/support"}
   ]
   return (
-    <aside className={`absolute inset-y-0 left-0 z-20  w-[250px] p-8 border-r border-slate-800 bg-slate-900 transition-transform lg:static lg:block lg:w-auto lg:translate-x-0 
+    <aside className={`fixed inset-y-0 left-0 z-50  w-[250px] p-8 border-r border-slate-800 bg-slate-900 transition-transform lg:sticky lg:h-screen lg:block lg:w-auto lg:translate-x-0 
     ${menuOpen 
       ? "translate-x-0"
       : "-translate-x-full"

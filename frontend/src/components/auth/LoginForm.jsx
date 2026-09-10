@@ -7,29 +7,42 @@ const LoginForm = ({accountType}) => {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [loginStatus, setLoginStatus] = useState("idle")
 
   const submitHandler = async (e)=>{
     e.preventDefault()
-    setIsLoading(true)
+    setLoginStatus("loading")
     try{
       const response = await api.post("/auth/login", {email, password})
       console.log(response.data)
-      alert('Login successful')
-      navigate("/dashboard", { replace: true })
+      setTimeout(()=>{
+        setLoginStatus("success")
+      },2000)
+      // setLoginStatus("success")
+      setEmail("")
+      setPassword("")
+
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true })
+      }, 3000)
       
     }catch(error){
       console.log(error);
-      alert(error.response?.data?.message || "Login Failed")
+      setTimeout(()=>{
+        setLoginStatus("error")
+
+      },2000)
+
+      setTimeout(() => {
+        setLoginStatus("idle")
+      }, 4000)
 
     }
-    setEmail("")
-    setPassword("")
     
   }
   return (
     <div className="mt-8">
-      {isLoading && <LoadingOverlay/>}
+      {loginStatus !== "idle" && <LoadingOverlay status={loginStatus}/>} 
       <div>
         <h2 className=" text-3xl font-semibold mb-2">
           {accountType === "admin" ? "Admin Sign in" : "Welcome Back"}
@@ -83,11 +96,14 @@ const LoginForm = ({accountType}) => {
           </a>
         </div>
 
-        <button type="submit" 
-        className=" w-full bg-blue-500 px-4 py-3 rounded-xl font-semibold text-slate-950 transition hover:bg-blue-400 hover:cursor-pointer">
-        {accountType === "admin"
-        ? "Access admin portal" 
-        : "Sign in securely"}
+        <button type="submit"
+        disabled={loginStatus !== "idle"}
+        className=" w-full bg-blue-500 px-4 py-3 rounded-xl font-semibold text-slate-950 transition hover:bg-blue-400 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-60">
+        {loginStatus === "loading"
+        ? "Signing in..."
+        : accountType === "admin"
+          ? "Access admin portal"
+          : "Sign in securely"}
       </button>
 
       </form>
