@@ -1,5 +1,27 @@
 import {Shield, MoreHorizontal } from "lucide-react"
+import getBalance from "../../../services/accountBalance.service"
+import { useState, useEffect } from "react"
 const EmergencyAccountCard = ({account}) => {
+    const [balance, setBalance] = useState(0)
+    const accountId = account._id
+      useEffect(() => {
+        const fetchBalance = async ()=> {
+          try {
+            const response = await getBalance(accountId)
+            console.log(response);
+            setBalance(response)
+            
+            
+          } catch (error) {
+            console.log("Something went wrong while fetching a Account's Balance", error);
+            
+            
+          }
+        }
+    
+        fetchBalance()
+       
+      },[])
   return (
     <article className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:-translate-y-0.5 hover:border-slate-600 ">
 
@@ -11,8 +33,8 @@ const EmergencyAccountCard = ({account}) => {
 
                 </div>
                 <div className=" ml-3">
-                    <h2 className="text-lg font-semibold">Emergency Funds</h2>
-                    <p>{account.number}</p>
+                    <h2 className="text-lg font-semibold">{account.accountName}</h2>
+                    <p>{account.accountNumber}</p>
 
                 </div>
 
@@ -27,7 +49,7 @@ const EmergencyAccountCard = ({account}) => {
             </button>
         </div>
 
-        <p className="mt-5 text-2xl font-semibold "> {account.balance} </p>
+        <p className="mt-5 text-2xl font-semibold "> {`₹ ${balance}`} </p>
     
     </article>
   )

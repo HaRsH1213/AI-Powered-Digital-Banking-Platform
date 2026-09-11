@@ -20,7 +20,11 @@ const RecentTransactions = ({transactions}) => {
 
       <div className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
         {recentTransactions.map((transaction)=>(
-          <TransactionRow transaction={transaction} setSelected={setSelected} />
+          <TransactionRow 
+            key={transaction.id}
+            transaction={transaction} 
+            setSelected={setSelected} 
+          />
 
         ))}
       </div>

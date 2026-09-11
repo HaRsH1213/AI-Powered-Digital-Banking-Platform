@@ -9,6 +9,26 @@ const accountSchema = new mongoose.Schema({
         index: true
 
     },
+    accountName:{
+        type: String,
+        required: [true,"Account's name is Required to creating a account"]
+        
+    },
+    accountType:{
+        type: String,
+        enum :{
+            values: ["Savings", "Current"],
+            message: "AccountType can be either  Saving  or Current"
+        },
+        default : "Savings"
+    },
+    accountNumber:{
+        type: String,
+        required: true,
+        unique: true,
+        immutable: true
+
+    },
     status:{
         type: String,
         enum: {

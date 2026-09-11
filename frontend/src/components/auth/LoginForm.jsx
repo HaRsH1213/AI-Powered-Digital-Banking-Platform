@@ -1,9 +1,10 @@
 import { useState } from "react"
-import api from "/src/services/api"
 import {useNavigate } from "react-router-dom"
 import LoadingOverlay from "./LoadingOverlay"
+import login from "../../services/auth.service"
 
-const LoginForm = ({accountType}) => {
+const LoginForm = ({accountType,setUserName}) => {
+  console.log(typeof setUserName)
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -13,8 +14,9 @@ const LoginForm = ({accountType}) => {
     e.preventDefault()
     setLoginStatus("loading")
     try{
-      const response = await api.post("/auth/login", {email, password})
-      console.log(response.data)
+      const response = await login({email, password})
+      console.log(response)
+      setUserName(response.name)
       setTimeout(()=>{
         setLoginStatus("success")
       },2000)

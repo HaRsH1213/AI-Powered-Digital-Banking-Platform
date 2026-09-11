@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DashboardLayout from '../components/dashboard/DashboardLayout'
 import Sidebar from '../components/dashboard/Sidebar'
 import DashboardHeader from '../components/dashboard/DashboardHeader'
@@ -10,22 +10,46 @@ import QuickActions from '../components/dashboard/QuickActions'
 import LoanCard from '../components/dashboard/LoanCard'
 import RecentTransactions from '../components/dashboard/RecentTransactions'
 import { transactionData } from '../data/transactions'
+import getAccounts from '../services/accounts.service'
 
-const DashboardPage = () => {
 
-  const accounts = [
-  { name: 'Primary Savings', type: 'Savings', number: '•••• 4821', balance: '₹48,250.00', color: 'bg-blue-500/15 text-blue-300', icon: '⌂' },
-  { name: 'Salary Account', type: 'Current', number: '•••• 7734', balance: '₹52,000.00', color: 'bg-emerald-500/15 text-emerald-300', icon: '▣' },
-  { name: 'Emergency Fund', type: 'Savings', number: '•••• 1190', balance: '₹24,250.00', color: 'bg-purple-500/15 text-purple-300', icon: '♢' },
-  ]
-  // const sampleTransaction = {
-  // id: 'TXN-20260828-001',
-  // name: 'UPI_CRADJ_U2_TDT_270826',
-  // date: '28 Aug 2026, 07:12 pm',
-  // amount: '+₹1',
-  // income: true,
-  // }
+
+const DashboardPage =  ({userName}) => {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [accounts, setAccounts] = useState([])
+
+  // const accountsNew = await api.post("/accounts/")
+  useEffect(() => {
+    const fetchAccountsData = async ()=>{
+      try {
+        const response = await getAccounts()
+        setAccounts(response)
+        console.log(response);
+        
+      } catch (error) {
+        console.log("Something went wrong while fetch Account's Data ", error);
+        
+        
+      }
+      
+    }
+
+    fetchAccountsData()
+  },[])
+  
+  
+  // const accounts = [
+  // { name: 'Primary Savings', type: 'Savings', number: '•••• 4821', balance: '₹48,250.00', color: 'bg-blue-500/15 text-blue-300', icon: '⌂' },
+  // { name: 'Salary Account', type: 'Current', number: '•••• 7734', balance: '₹52,000.00', color: 'bg-emerald-500/15 text-emerald-300', icon: '▣' },
+  // { name: 'Emergency Fund', type: 'Savings', number: '•••• 1190', balance: '₹24,250.00', color: 'bg-purple-500/15 text-purple-300', icon: '♢' },
+  // ]
+  // // const sampleTransaction = {
+  // // id: 'TXN-20260828-001',
+  // // name: 'UPI_CRADJ_U2_TDT_270826',
+  // // date: '28 Aug 2026, 07:12 pm',
+  // // amount: '+₹1',
+  // // income: true,
+  // // }
   return (
     <DashboardLayout>
 
@@ -45,7 +69,7 @@ const DashboardPage = () => {
         <div className="mt-5 mb-8 lg:mt-0">
         <p className="text-sm text-slate-400 ">
 
-          Welcome Back, Harsh
+          Welcome Back, {userName}
 
         </p>
 
@@ -60,13 +84,13 @@ const DashboardPage = () => {
 
         <div className='grid md:grid-cols-3 mt-5 gap-4'>
           {accounts.map((account)=>{
-            switch(account.name){
-              case "Primary Savings":
-                return <PrimaryAccountCard account={account} key={account.name} />
+            switch(account.accountName){
+              case "Primary Account":
+                return <PrimaryAccountCard account={account} key={account.accountName} />
               case "Salary Account" :
-                return <SalaryAccountCard account={account} key={account.name} />
-              case "Emergency Fund" :
-                return <EmergencyAccountCard account={account} key={account.name} />
+                return <SalaryAccountCard account={account} key={account.accountName} />
+              case "Emergency Funds" :
+                return <EmergencyAccountCard account={account} key={account.accountName} />
             }
           })}
         </div>

@@ -4,14 +4,14 @@ import AuthBrandPanel from "../components/auth/AuthBrandPanel"
 import AuthLayout from "../components/auth/AuthLayout"
 import AuthPanel from "../components/auth/AuthPanel"
 import LoginForm from "../components/auth/LoginForm"
-const LoginPage = () => {
+const LoginPage = ({setUserName}) => {
   const [accountType, setAccountType] = useState("user")
     return (
       <AuthLayout>
         <AuthBrandPanel/>
         <AuthPanel>
           <AccountTypeTabs accountType={accountType} onChange={setAccountType}/>
-          <LoginForm accountType={accountType}/>
+          <LoginForm accountType={accountType} setUserName={setUserName}/>
         </AuthPanel>
       </AuthLayout>
     )
