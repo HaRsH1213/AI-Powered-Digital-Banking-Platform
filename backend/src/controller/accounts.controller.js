@@ -64,13 +64,10 @@ async function getTotalBalanceController(req, res) {
     })
 
     const balances = await Promise.all(
-        accounts.map((account) => account.getBalance())
+        accounts.map((account)=> account.getBalance())
     )
-
-    const totalBalance = balances.reduce(
-        (total, balance) => total + balance,
-        0
-    )
+    const totalBalance =  balances.reduce(
+        (total, balance)=> total + balance, 0)
 
     return res.status(200).json({
         message: "Total balance fetched",
@@ -78,4 +75,4 @@ async function getTotalBalanceController(req, res) {
     })
 }
 
-module.exports = {createAccountController, getUserAccountsController, getAccountBalanceController}
+module.exports = {createAccountController, getUserAccountsController, getAccountBalanceController, getTotalBalanceController}

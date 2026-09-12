@@ -21,7 +21,8 @@ const userModel = require("../models/user.model")
  */
 
 async function createTransaction (req, res){
-    const {fromAccount, toAccount, amount, idempotencyKey} = req.body
+    const {fromAccount, toAccount, amount} = req.body
+    const idempotencyKey = req.get("idempotencyKey") || req.body.idempotencyKey 
 
     /**
      *1. Validate request
@@ -55,6 +56,13 @@ async function createTransaction (req, res){
         idempotencyKey: idempotencyKey
     })
     if(isTransactionAlreadyExists){
+        const sameDetails = isTransactionAlreadyExists.fromAccount.toString() === fromAccount && isTransactionAlreadyExists.toAccount.toString() === toAccount && Number(isTransactionAlreadyExists.amount) === Number(amount)
+
+        if(!sameDetails){
+            return res.status(409).json({
+                message: "Idempotency key was already used with different transaction details",
+        }) 
+        }
         if(isTransactionAlreadyExists.status === "COMPLETED"){
         return res.status(200).json({
             message: "Transaction already processed",
@@ -67,7 +75,7 @@ async function createTransaction (req, res){
     
         })
         }
-        if(isTransactionAlreadyExists.status === "Failed"){
+        if(isTransactionAlreadyExists.status === "FAILED"){
         return res.status(500).json({
             message: "Transaction Falied please try again later",
             transaction: isTransactionAlreadyExists
@@ -194,7 +202,8 @@ async function createInitialTransaction(req, res){
     console.log("idempotencyKey:", req.body.idempotencyKey)
     console.log("Content-Type:", req.headers["content-type"])
     console.log("================================")
-    const {toAccount, amount, idempotencyKey} = req.body
+    const {fromAccount, toAccount, amount} = req.body
+    const idempotencyKey = req.get("idempotencyKey") || req.body.idempotencyKey 
 
     if(!toAccount || !amount || !idempotencyKey){
         return res.status(401).json({
@@ -230,6 +239,13 @@ async function createInitialTransaction(req, res){
         idempotencyKey: idempotencyKey
     })
     if(isTransactionAlreadyExists){
+        const sameDetails = isTransactionAlreadyExists.toAccount.toString() === toAccount && Number(isTransactionAlreadyExists.amount) === Number(amount)
+
+        if(!sameDetails){
+            return res.status(409).json({
+                message: "Idempotency key was already used with different transaction details",
+        }) 
+        }
         if(isTransactionAlreadyExists.status === "COMPLETED"){
         return res.status(200).json({
             message: "Transaction already processed",
@@ -242,7 +258,7 @@ async function createInitialTransaction(req, res){
     
         })
         }
-        if(isTransactionAlreadyExists.status === "Failed"){
+        if(isTransactionAlreadyExists.status === "FAILED"){
         return res.status(500).json({
             message: "Transaction Falied please try again later",
             transaction: isTransactionAlreadyExists
@@ -293,5 +309,10 @@ async function createInitialTransaction(req, res){
 
     await session.commitTransaction()
     session.endSession()
+
+    return res.status(201).json({
+        message: "Initial transaction completed successfully",
+        transaction,
+    })
 }
 module.exports = {createTransaction, createInitialTransaction}

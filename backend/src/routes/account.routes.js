@@ -17,10 +17,18 @@ router.get("/", authMiddleware.authMiddleware, accountController.getUserAccounts
 
 /**
  * - GET /api/accounts/balance/:accountId
- * - Get total Balance of the logged_in user
+ * - Get Balance of mention account of the logged_in user
  * - Protected Route
  */
 router.get("/balance/:accountId", authMiddleware.authMiddleware, accountController.getAccountBalanceController)
+
+/**
+ * - GET /api/accounts/balance/totalBalance
+ * - Get Total Balance of all account's of logged_in user
+ * - Protected Route
+ */
+
+router.get("/totalBalance", authMiddleware.authMiddleware, accountController.getTotalBalanceController)
 
 module.exports = router
 
