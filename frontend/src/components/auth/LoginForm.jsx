@@ -1,22 +1,22 @@
 import { useState } from "react"
 import {useNavigate } from "react-router-dom"
 import LoadingOverlay from "./LoadingOverlay"
-import login from "../../services/auth.service"
+import { useAuth } from "../../context/AuthProvider"
 
-const LoginForm = ({accountType,setUserName}) => {
-  console.log(typeof setUserName)
+const LoginForm = ({accountType}) => {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loginStatus, setLoginStatus] = useState("idle")
 
+  const {signIn} = useAuth()
+
   const submitHandler = async (e)=>{
     e.preventDefault()
     setLoginStatus("loading")
     try{
-      const response = await login({email, password})
-      console.log(response)
-      setUserName(response.name)
+      const loggedInUser  = await signIn({email, password})
+      console.log(loggedInUser)
       setTimeout(()=>{
         setLoginStatus("success")
       },2000)

@@ -5,7 +5,6 @@ import LoginPage from './pages/LoginPage'
 import TransactionsPage from './pages/TransactionsPage'
 import { useState } from 'react'
 const App = () => {
-  const [userName, setUserName] = useState('')
   // useEffect(() => {
   //   const fetchAccountData = async ()=>{
   //     try {
@@ -25,8 +24,8 @@ const App = () => {
   
   return (
     <Routes>
-      <Route path='/' element= {<LoginPage setUserName={setUserName} />} />
-      <Route path='/dashboard' element={<DashboardPage userName={userName}/>} />
+      <Route path='/' element= {<LoginPage />} />
+      <Route path='/dashboard' element={<DashboardPage/>} />
       <Route path='/accounts' element= {<AccountsPage/>} />
       <Route path='/transactions' element= {<TransactionsPage/>} />
     </Routes>

@@ -11,12 +11,15 @@ import LoanCard from '../components/dashboard/LoanCard'
 import RecentTransactions from '../components/dashboard/RecentTransactions'
 import { transactionData } from '../data/transactions'
 import getAccounts from '../services/accounts.service'
+import { useAuth } from '../context/AuthProvider'
 
 
 
-const DashboardPage =  ({userName}) => {
+const DashboardPage =  () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [accounts, setAccounts] = useState([])
+
+  const {user, loading} = useAuth()
 
   // const accountsNew = await api.post("/accounts/")
   useEffect(() => {
@@ -69,7 +72,7 @@ const DashboardPage =  ({userName}) => {
         <div className="mt-5 mb-8 lg:mt-0">
         <p className="text-sm text-slate-400 ">
 
-          Welcome Back, {userName}
+          Welcome Back, {user?.name}
 
         </p>
 

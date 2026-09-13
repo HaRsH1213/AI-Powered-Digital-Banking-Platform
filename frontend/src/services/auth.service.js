@@ -1,9 +1,14 @@
 import api from "./api"
 
-const login = async (credentials)=>{
+export const login = async (credentials)=>{
     const response = await api.post("/auth/login", credentials)
     return response.data.user
 
 }
 
-export default login
+
+export const logout = async () => {
+    return await api.post("/auth/logout")
+}
+
+// export default {login, logout}
