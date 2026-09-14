@@ -3,7 +3,6 @@ import AccountsPage from './pages/AccountsPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import TransactionsPage from './pages/TransactionsPage'
-import { useState } from 'react'
 const App = () => {
   // useEffect(() => {
   //   const fetchAccountData = async ()=>{

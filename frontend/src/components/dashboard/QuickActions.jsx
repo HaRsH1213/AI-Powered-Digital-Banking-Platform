@@ -1,8 +1,10 @@
 import { Send, CirclePlus, FileText } from "lucide-react";
-const QuickActions = () => {
+const QuickActions = ({ setShowTransfer }) => {
   return (
     <div className="grid grid-cols-3 gap-4 mt-8">
       <button
+        type="button"
+        onClick={()=> setShowTransfer(true)}
         className="flex items-center justify-center gap-2 py-2 text-sm text-slate-300 font-medium transition hover:text-blue-300 hover:cursor-pointer"
       >
         <Send size={13} />

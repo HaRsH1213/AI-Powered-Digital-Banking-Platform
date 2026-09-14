@@ -12,12 +12,14 @@ import RecentTransactions from '../components/dashboard/RecentTransactions'
 import { transactionData } from '../data/transactions'
 import getAccounts from '../services/accounts.service'
 import { useAuth } from '../context/AuthProvider'
+import TransferModal from '../components/transfer/TransferModal'
 
 
 
 const DashboardPage =  () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [accounts, setAccounts] = useState([])
+  const [showTransfer, setShowTransfer] = useState(false)
 
   const {user, loading} = useAuth()
 
@@ -97,11 +99,13 @@ const DashboardPage =  () => {
             }
           })}
         </div>
-        <QuickActions/>
+        <QuickActions setShowTransfer={setShowTransfer} />
         <LoanCard/>
         {/* <TransactionRow transaction={sampleTransaction}/> */}
         {/* <TransactionList transactions={transactionData}/> */}
         <RecentTransactions transactions={transactionData}/>
+
+        {showTransfer && <TransferModal/> }
         
       </section>
     </DashboardLayout>
