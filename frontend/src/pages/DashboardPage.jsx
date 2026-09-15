@@ -105,7 +105,7 @@ const DashboardPage =  () => {
         {/* <TransactionList transactions={transactionData}/> */}
         <RecentTransactions transactions={transactionData}/>
 
-        {showTransfer && <TransferModal/> }
+        {showTransfer && <TransferModal accounts={accounts}/> }
         
       </section>
     </DashboardLayout>

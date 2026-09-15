@@ -4,11 +4,11 @@ import getBalance from "../../../services/accountBalance.service"
 import { useState } from "react"
 const PrimaryAccountCard = ({account}) => {
   const [balance, setBalance] = useState(0)
-  const accountId = account._id
+  const accountNumber = account.accountNumber
   useEffect(() => {
     const fetchBalance = async ()=> {
       try {
-        const response = await getBalance(accountId)
+        const response = await getBalance(accountNumber)
         console.log(response);
         setBalance(response)
         

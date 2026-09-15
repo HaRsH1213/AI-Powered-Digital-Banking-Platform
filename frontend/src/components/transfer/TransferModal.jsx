@@ -1,6 +1,9 @@
 import TransferForm from "./TransferForm"
 import { X } from "lucide-react"
-const TransferModal = () => {
+import TransferSummary from "./TransferSummary"
+import { useState } from "react"
+const TransferModal = ({accounts}) => {
+  const [isReviewOn, setIsReviewOn] = useState(false)
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center  bg-slate-950/75 backdrop-blur-sm p-3 sm:p-6 ">
       <div className="w-full max-w-3xl max-h-[92vh] rounded-2xl border border-slate-700 bg-slate-950 shadow-2xl shadow-black/50 overflow-auto sm:rounded-3xl ">
@@ -23,10 +26,14 @@ const TransferModal = () => {
         </div>
 
         <div className="p-5 sm:p-8">
-          <TransferForm/>
-
+          <TransferForm accounts={accounts} setIsReviewOn={setIsReviewOn}/>
+          
+          {isReviewOn && 
+          <TransferSummary/>}
         </div>
+        
       </div>
+    
 
     </div>
     

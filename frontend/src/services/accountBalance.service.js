@@ -1,7 +1,7 @@
 import api from "./api"
 
-const getBalance = async (accountId)=> {
-    const response = await api.get(`/accounts/balance/${accountId}`)
+const getBalance = async (accountNumber)=> {
+    const response = await api.get(`/accounts/balance/${accountNumber}`)
     return response.data.balance
 
 }
