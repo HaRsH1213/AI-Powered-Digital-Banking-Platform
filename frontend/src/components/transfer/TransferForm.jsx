@@ -1,12 +1,9 @@
 import { ArrowDown, ShieldCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import getBalance from "../../services/accountBalance.service"
-const TransferForm = ({accounts, setIsReviewOn }) => {
-  const [fromAccount, setFromAccount] = useState(accounts[0]?.accountNumber??"")
+import getReceiverName from "../../services/receiver.service"
+const TransferForm = ({accounts, setIsReviewOn, fromAccount, setFromAccount,setFromAccountName, toAccount, setToAccount, setReceiverName, amountTransfer, setAmountTransfer, isReviewed}) => {
   const [accountAvailableBalance, setAccountAvailableBalance] = useState(0)
-  const [toAccount, setToAccount] = useState(null)
-  const [amountTransfer, setAmountTransfer] = useState(null)
-
   useEffect(() => {
     const fetchAccountBalance = async ()=>{
       try {
@@ -21,6 +18,27 @@ const TransferForm = ({accounts, setIsReviewOn }) => {
     fetchAccountBalance()
  
   }, [fromAccount])
+
+  useEffect(() => {
+    if (toAccount.length !== 12) {
+    setReceiverName("")
+    return
+  }
+    const fetchReceiverName = async () =>{
+      try {
+        const name = await getReceiverName(toAccount)
+        setReceiverName(name)
+
+        
+      } catch (error) {
+        console.log("Somthing went wrong to fetch receiver name", error );
+        
+        
+      }
+    }
+    fetchReceiverName()
+  }, [toAccount])
+  
   
   return (
     <section className="rounded-2xl border border-slate-700 bg-slate-800  p-5 sm:p-7">
@@ -42,9 +60,14 @@ const TransferForm = ({accounts, setIsReviewOn }) => {
           </label>
           <div className=" flex flex-col gap-2 ">
             <select
+              disabled = {isReviewed}
               value={fromAccount}
               onChange={(e)=>{
-                setFromAccount(e.target.value)
+                const selectedAccountNumber = e.target.value
+                const selectedAccount = accounts.find((account) => account.accountNumber === selectedAccountNumber)
+
+                setFromAccount(selectedAccountNumber)
+                setFromAccountName(selectedAccount.accountName)
               }} 
               className=" w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30">
             {accounts.map((account)=>(
@@ -74,12 +97,13 @@ const TransferForm = ({accounts, setIsReviewOn }) => {
             To Account
           </label>
           <input
+            disabled = {isReviewed}
             type="number"
             value={toAccount}
             onChange={(e) => {
               setToAccount(e.target.value)
             }}
-            required="true"
+            required
             
             className=" w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 "
             placeholder="Enter Reciver's Account No. "
@@ -99,12 +123,13 @@ const TransferForm = ({accounts, setIsReviewOn }) => {
             Amount
           </label>
           <input
+            disabled = {isReviewed}
             value={amountTransfer}
             onChange={(e) => {
               setAmountTransfer(e.target.value)
             }}
             type="number"
-            required="true"
+            required
             className=" w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 "
 
             placeholder="Enter Reciver's Account No. "

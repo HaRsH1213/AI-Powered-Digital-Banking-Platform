@@ -4,9 +4,17 @@ import TransferSummary from "./TransferSummary"
 import { useState } from "react"
 const TransferModal = ({accounts}) => {
   const [isReviewOn, setIsReviewOn] = useState(false)
+
+
+  const [fromAccount, setFromAccount] = useState(accounts[0]?.accountNumber??"")
+  const [fromAccountName, setFromAccountName] = useState(accounts[0]?.accountName??"")
+  const [toAccount, setToAccount] = useState("")
+  const [receiverName, setReceiverName] = useState("")
+  const [amountTransfer, setAmountTransfer] = useState("")
+  const [isReviewed, setIsReviewed] = useState(false)
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center  bg-slate-950/75 backdrop-blur-sm p-3 sm:p-6 ">
-      <div className="w-full max-w-3xl max-h-[92vh] rounded-2xl border border-slate-700 bg-slate-950 shadow-2xl shadow-black/50 overflow-auto sm:rounded-3xl ">
+      <div className="relative w-full max-w-3xl max-h-[92vh] rounded-2xl border border-slate-700 bg-slate-950 shadow-2xl shadow-black/50 overflow-auto sm:rounded-3xl ">
         <div className=" flex items-center justify-between px-5 py-4 border-b border-slate-800 sm:px-8 sm:py-5">
           <div>
             <p className="text-xs text-slate-400">
@@ -26,10 +34,10 @@ const TransferModal = ({accounts}) => {
         </div>
 
         <div className="p-5 sm:p-8">
-          <TransferForm accounts={accounts} setIsReviewOn={setIsReviewOn}/>
+          <TransferForm accounts={accounts} setIsReviewOn={setIsReviewOn} fromAccount={fromAccount} setFromAccount={setFromAccount} setFromAccountName={setFromAccountName} toAccount={toAccount} setToAccount={setToAccount} setReceiverName={setReceiverName} amountTransfer={amountTransfer} setAmountTransfer={setAmountTransfer} isReviewed={isReviewed}  />
           
-          {isReviewOn && 
-          <TransferSummary/>}
+          {isReviewOn && !isReviewed &&
+          <TransferSummary fromAccount={fromAccount} fromAccountName={fromAccountName} toAccount={toAccount} receiverName={receiverName} amountTransfer={amountTransfer} setIsReviewOn={setIsReviewOn} setIsReviewed={setIsReviewed}/>}
         </div>
         
       </div>
