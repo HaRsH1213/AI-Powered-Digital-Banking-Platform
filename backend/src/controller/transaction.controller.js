@@ -35,11 +35,11 @@ async function createTransaction (req, res){
 
     }
     const fromUserAccount = await accountModel.findOne({
-        _id: fromAccount,
+        accountNumber: fromAccount,
         user: req.user._id
     })
     const toUserAccount = await accountModel.findOne({
-        _id: toAccount
+        accountNumber: toAccount
     })
 
     if (!fromUserAccount || !toUserAccount){
@@ -212,7 +212,7 @@ async function createInitialTransaction(req, res){
     }
 
     const toUserAccount = await accountModel.findOne({
-        _id: toAccount,
+        accountNumber: toAccount,
         
     })
     if (!toUserAccount) {

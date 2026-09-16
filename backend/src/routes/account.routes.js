@@ -16,11 +16,11 @@ router.post("/", authMiddleware.authMiddleware, accountController.createAccountC
 router.get("/", authMiddleware.authMiddleware, accountController.getUserAccountsController)
 
 /**
- * - GET /api/accounts/balance/:accountId
+ * - GET /api/accounts/balance/:accountNumber
  * - Get Balance of mention account of the logged_in user
  * - Protected Route
  */
-router.get("/balance/:accountId", authMiddleware.authMiddleware, accountController.getAccountBalanceController)
+router.get("/balance/:accountNumber", authMiddleware.authMiddleware, accountController.getAccountBalanceController)
 
 /**
  * - GET /api/accounts/balance/totalBalance
