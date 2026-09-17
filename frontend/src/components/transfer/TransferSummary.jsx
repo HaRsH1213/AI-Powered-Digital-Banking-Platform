@@ -1,8 +1,25 @@
 import {X, ShieldCheck} from "lucide-react"
-const TransferSummary = ({fromAccount, fromAccountName, toAccount, receiverName, amountTransfer, setIsReviewOn, setIsReviewed}) => {
+const TransferSummary = ({
+  isReviewOn, isReviewed, fromAccount, fromAccountName, toAccount, 
+  receiverName, amountTransfer, setIsReviewOn, setIsReviewed}) => {
   return (
-    <div className="absolute inset-0 z-120 p-4 flex justify-center items-center bg-slate-950/70 backdrop-blur-sm">
-      <aside className="w-full max-w-lg h-full max-h-[68vh] rounded-2xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
+    <div className={
+      `absolute inset-0 z-120 p-4 flex justify-center items-center
+      bg-slate-950/70 backdrop-blur-sm 
+      transition-opacity duration-300 ease-out 
+      ${
+        isReviewOn && !isReviewed 
+        ? "opacity-100"
+        : "opacity-0 pointer-events-none"
+      }`}>
+      <aside className={
+        `w-full max-w-lg h-full max-h-[68vh] rounded-2xl border border-slate-800 
+        bg-slate-900 p-4 sm:p-6 transform transition-all duration-300 ease-out
+        ${
+          isReviewOn && !isReviewed
+          ? "translate-z-0 opacity-100 scale-100"
+          : "transalte-z-10 opacity-0 scale-95"
+        }`}>
         <div className="flex items-center justify-between  border-b border-slate-800 pb-5 ">
           <div>
             <p className="text-sm text-slate-400">
@@ -55,7 +72,9 @@ const TransferSummary = ({fromAccount, fromAccountName, toAccount, receiverName,
         <button
           onClick={()=>setIsReviewed(true)}
           type="button"
-          className="w-full px-4 py-3 mt-5 rounded-xl border border-slate-700 text-sm font-semibold text-slate-200 transition hover:border-blue-400 hover:text-blue-300 hover:cursor-pointer">
+          className="w-full px-4 py-3 mt-5 rounded-xl border border-slate-700 
+          text-sm font-semibold text-slate-200 
+          transition hover:border-blue-400 hover:text-blue-300 hover:cursor-pointer">
           Continue to Confirmation
         </button>
 
