@@ -105,7 +105,12 @@ const DashboardPage =  () => {
         {/* <TransactionList transactions={transactionData}/> */}
         <RecentTransactions transactions={transactionData}/>
 
-        {showTransfer && <TransferModal accounts={accounts}/> }
+        {/* {showTransfer && <TransferModal accounts={accounts} isOpen={showTransfer} onClose = {() => setShowTransfer(false)}/> } */}
+        <TransferModal
+          accounts={accounts}
+          isOpen={showTransfer}
+          onClose={() => setShowTransfer(false)}
+        />
         
       </section>
     </DashboardLayout>

@@ -2,7 +2,10 @@ import { ArrowDown, ShieldCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import getBalance from "../../services/accountBalance.service"
 import getReceiverName from "../../services/receiver.service"
-const TransferForm = ({accounts, setIsReviewOn, fromAccount, setFromAccount,setFromAccountName, toAccount, setToAccount, setReceiverName, amountTransfer, setAmountTransfer, isReviewed}) => {
+import transfer from "../../services/transfer.service"
+const TransferForm = ({
+  accounts, setIsReviewOn, fromAccount, setFromAccount,
+  setFromAccountName, toAccount, setToAccount, setReceiverName, amountTransfer, setAmountTransfer, isReviewed}) => {
   const [accountAvailableBalance, setAccountAvailableBalance] = useState(0)
   useEffect(() => {
     const fetchAccountBalance = async ()=>{
@@ -16,7 +19,6 @@ const TransferForm = ({accounts, setIsReviewOn, fromAccount, setFromAccount,setF
       }
     }
     fetchAccountBalance()
- 
   }, [fromAccount])
 
   useEffect(() => {
@@ -39,9 +41,20 @@ const TransferForm = ({accounts, setIsReviewOn, fromAccount, setFromAccount,setF
     fetchReceiverName()
   }, [toAccount])
   
-  
+  const submitHandler = async(e) =>{
+    e.preventDefault()
+    try {
+      const response = await transfer(fromAccount, toAccount, amountTransfer)
+      console.log(response)
+      
+    } catch (error) {
+      console.log("Something went wrong while transfering ", error);
+      
+      
+    }
+  }
   return (
-    <section className="rounded-2xl border border-slate-700 bg-slate-800  p-5 sm:p-7">
+    <section className={`rounded-2xl border border-slate-700 bg-slate-800  p-5 sm:p-7`}>
       <div className="mb-6 flex items-center justify-between gap-4">
         <h2 
           id="new-transfer-heading"
@@ -53,7 +66,11 @@ const TransferForm = ({accounts, setIsReviewOn, fromAccount, setFromAccount,setF
 
         </span>
       </div>
-      <form className="space-y-5">
+      <form 
+        onSubmit={(e)=>{
+          submitHandler(e)
+        }}
+        className="space-y-5">
         <div >
           <label className="mb-2 block text-sm font-medium text-slate-300  ">
             From Account
@@ -142,12 +159,19 @@ const TransferForm = ({accounts, setIsReviewOn, fromAccount, setFromAccount,setF
             Secure transfer verification enabled
           </span>
 
-          <button 
-            type="button"
-            onClick={() =>setIsReviewOn(true)}
-            className="rounded-xl px-5 py-3 bg-blue-500 text-sm font-semibold text-slate-950 transition hover:bg-blue-400 hover:cursor-pointer">
-            Review transfer
-          </button>
+          {isReviewed 
+            ?(<button
+              type="submit"
+              className="rounded-xl px-5 py-3 bg-blue-500 text-sm font-semibold text-slate-950 transition hover:bg-blue-400 hover:cursor-pointer">
+              Click to Processed
+            </button>)
+            :(<button 
+              type="button"
+              onClick={() =>setIsReviewOn(true)}
+              className="rounded-xl px-5 py-3 bg-blue-500 text-sm font-semibold text-slate-950 transition hover:bg-blue-400 hover:cursor-pointer">
+              Review transfer
+            </button>)
+          }
         </div>
 
       </form>
