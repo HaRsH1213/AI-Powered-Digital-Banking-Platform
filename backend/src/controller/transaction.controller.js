@@ -56,8 +56,11 @@ async function createTransaction (req, res){
         idempotencyKey: idempotencyKey
     })
     if(isTransactionAlreadyExists){
-        const sameDetails = isTransactionAlreadyExists.fromAccount.toString() === fromAccount && isTransactionAlreadyExists.toAccount.toString() === toAccount && Number(isTransactionAlreadyExists.amount) === Number(amount)
-
+        const sameDetails =
+            isTransactionAlreadyExists.fromAccount.toString() === fromUserAccount._id.toString() &&
+            isTransactionAlreadyExists.toAccount.toString() === toUserAccount._id.toString() &&
+            Number(isTransactionAlreadyExists.amount) === Number(amount)
+            
         if(!sameDetails){
             return res.status(409).json({
                 message: "Idempotency key was already used with different transaction details",
@@ -118,8 +121,8 @@ async function createTransaction (req, res){
 
     // 1. Create PENDING transaction
     const transactionResult = await transactionModel.create([{
-        fromAccount,
-        toAccount,
+        fromAccount: fromUserAccount._id,
+        toAccount: toUserAccount._id,
         amount,
         idempotencyKey,
         status: "PENDING"
@@ -136,7 +139,7 @@ async function createTransaction (req, res){
 
         // DEBIT
         await ledgerModel.create([{
-            account: fromAccount,
+            account: fromUserAccount._id,
             amount,
             transaction: transaction._id,
             type: "DEBIT"
@@ -151,7 +154,7 @@ async function createTransaction (req, res){
 
         // CREDIT
         await ledgerModel.create([{
-            account: toAccount,
+            account: toUserAccount._id,
             amount,
             transaction: transaction._id,
             type: "CREDIT"
@@ -239,7 +242,7 @@ async function createInitialTransaction(req, res){
         idempotencyKey: idempotencyKey
     })
     if(isTransactionAlreadyExists){
-        const sameDetails = isTransactionAlreadyExists.toAccount.toString() === toAccount && Number(isTransactionAlreadyExists.amount) === Number(amount)
+        const sameDetails = isTransactionAlreadyExists.toAccount.toString() === toUserAccount._id.toString() && Number(isTransactionAlreadyExists.amount) === Number(amount)
 
         if(!sameDetails){
             return res.status(409).json({
