@@ -89,6 +89,12 @@ async function createTransaction (req, res){
             message: "Transaction was reversed, please try again later",
         })
         }
+        if (isTransactionAlreadyExists.status === "REJECTED") {
+        return res.status(400).json({
+            message: "Transfer was rejected due to insufficient balance",
+            transaction: isTransactionAlreadyExists
+        })
+}
     }
 
      /**
@@ -108,9 +114,18 @@ async function createTransaction (req, res){
 
 
     const userBalance = await fromUserAccount.getBalance()
-    if(userBalance < amount){
+    if (userBalance < amount) {
+    const failedTransaction = await transactionModel.create({
+        fromAccount: fromUserAccount._id,
+        toAccount: toUserAccount._id,
+        amount,
+        idempotencyKey,
+        status: "REJECTED"
+    })
+
     return res.status(400).json({
-        message: `Insufficient balance. Current balance is ${userBalance} and Requested Amount is ${amount} `
+        message: `Insufficient balance. Current balance is ${userBalance} and requested amount is ${amount}`,
+        transaction: failedTransaction
     })
     }
 
