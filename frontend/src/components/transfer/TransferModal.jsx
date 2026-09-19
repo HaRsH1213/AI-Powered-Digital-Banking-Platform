@@ -2,6 +2,7 @@ import TransferForm from "./TransferForm"
 import { X } from "lucide-react"
 import TransferSummary from "./TransferSummary"
 import { useState, useEffect } from "react"
+import TransferStatusOverlay from "./TransferStatusOverlay"
 const TransferModal = ({accounts, isOpen, onClose}) => {
   const [isReviewOn, setIsReviewOn] = useState(false)
 
@@ -12,6 +13,9 @@ const TransferModal = ({accounts, isOpen, onClose}) => {
   const [receiverName, setReceiverName] = useState("")
   const [amountTransfer, setAmountTransfer] = useState("")
   const [isReviewed, setIsReviewed] = useState(false)
+  const [transferStatus, setTransferStatus] = useState("idle")
+  const [transactionResult, setTransactionResult] = useState(null)
+ 
 
   useEffect(() => {
   if (!fromAccount && accounts.length > 0) {
@@ -29,7 +33,19 @@ const TransferModal = ({accounts, isOpen, onClose}) => {
   setAmountTransfer("")
   setIsReviewed(false)
 }
+
+const closeStatusOverlay = () => {
+    if (transferStatus === "success") {
+      resetForm()
+      onClose()
+      return
+    }
+
+    setTransferStatus("idle")
+  }
+
   return (
+    
     <div className={`
       fixed inset-0 z-100 flex items-center justify-center  bg-slate-950/75 backdrop-blur-sm 
       p-3 sm:p-6 transition-opacity ease-out duration-300 
@@ -82,6 +98,9 @@ const TransferModal = ({accounts, isOpen, onClose}) => {
             amountTransfer={amountTransfer} 
             setAmountTransfer={setAmountTransfer} 
             isReviewed={isReviewed}  
+            setTransferStatus = {setTransferStatus}
+            setTransactionResult = {setTransactionResult}
+
           />
           
           {/* {isReviewOn && !isReviewed &&
@@ -98,6 +117,9 @@ const TransferModal = ({accounts, isOpen, onClose}) => {
             setIsReviewOn={setIsReviewOn} 
             setIsReviewed={setIsReviewed}
           />
+
+
+          <TransferStatusOverlay status={transferStatus} transactionResult={transactionResult} onClose={closeStatusOverlay} />
         </div>
         
       </div>

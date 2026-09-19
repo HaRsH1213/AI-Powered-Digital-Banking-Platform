@@ -3,9 +3,12 @@ import { useEffect, useState } from "react"
 import getBalance from "../../services/accountBalance.service"
 import getReceiverName from "../../services/receiver.service"
 import transfer from "../../services/transfer.service"
+import { clearPendingTransfer } from "../../utils/pendingTransfer"
 const TransferForm = ({
   accounts, setIsReviewOn, fromAccount, setFromAccount,
-  setFromAccountName, toAccount, setToAccount, setReceiverName, amountTransfer, setAmountTransfer, isReviewed}) => {
+  setFromAccountName, toAccount, setToAccount, setReceiverName, 
+  amountTransfer, setAmountTransfer, isReviewed,
+  setTransferStatus, setTransactionResult}) => {
   const [accountAvailableBalance, setAccountAvailableBalance] = useState(0)
   useEffect(() => {
     const fetchAccountBalance = async ()=>{
@@ -43,12 +46,21 @@ const TransferForm = ({
   
   const submitHandler = async(e) =>{
     e.preventDefault()
+    setTransferStatus("processing")
+
     try {
-      const response = await transfer(fromAccount, toAccount, amountTransfer)
-      console.log(response)
+      const transaction = await transfer(fromAccount, toAccount, amountTransfer)
+      console.log(transaction)
+    
+      setTransactionResult(transaction)
+      setTransferStatus("success")
+      clearPendingTransfer()
       
     } catch (error) {
       console.log("Something went wrong while transfering ", error);
+      setTransferStatus(error.response?.data)
+      setTransferStatus("error")
+      clearPendingTransfer()
       
       
     }
@@ -149,7 +161,7 @@ const TransferForm = ({
             required
             className=" w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/30 "
 
-            placeholder="Enter Reciver's Account No. "
+            placeholder="Enter Amount to Transfer"
           />
 
         </div>
