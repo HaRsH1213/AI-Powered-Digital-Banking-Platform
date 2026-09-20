@@ -1,6 +1,9 @@
 import { Check, CircleX, Landmark } from "lucide-react"
 
-const TransferStatusOverlay = ({status, transactionResult, onClose}) => {
+const TransferStatusOverlay = ({
+  status, transactionResult, onClose, 
+  fromAccount, fromAccountName, toAccount,
+  receiverName, amountTransfer}) => {
   const isProcessing = status === "processing"
   const isSuccess = status === "success"
   const isError = status === "error"
@@ -70,53 +73,72 @@ const TransferStatusOverlay = ({status, transactionResult, onClose}) => {
       <p className="mt-2 text-sm leading-relaxed text-slate-400">
         {isProcessing && "Please do not close this window while we securely process your payment."}
         {isSuccess && "Your money has been sent securely and the recipient account has been credited."}
-        {isError && (message || "Please review your details and try again.")}
+        {isError && ("Please review your details and try again.")}
 
 
       </p>
 
-      {isSuccess && (
-        <>
-          <div className="mt-4 grid place-items-center">
-            <h2 className="text-2xl font-semibold">
-                {transactionResult.amount}
-            </h2>
+      {(isSuccess || isError) && transactionResult?.transaction 
+        ? (
+          <>
+            <div className="mt-4 grid place-items-center">
+              <h2 className="text-2xl font-semibold">
+                  ₹ {transactionResult?.transaction?.amount}
+              </h2>
 
-            <p className="text-sm leading-relaxed text-slate-400">
-              Sent to priya sharma ....123 
+              {isSuccess
+                ?(
+                  <p className="text-sm leading-relaxed text-slate-400">
+                    Sent to {receiverName} •••• {" "}{toAccount.slice(-4)} 
+                  </p>
+                )
+                : (
+                  <p className="text-sm leading-relaxed text-red-500">
+                    Insufficient Balance 
+                  </p>
+                )
+              }
+
+            </div>
+
+            <div className="mt-6 divide-y divide-slate-800 border-y border-slate-800 text-left text-sm">
+              <div className="flex justify-between gap-4 items-center py-3">
+                <span className="text-slate-400">
+                    From
+                </span>
+
+                <span className="font-semibold text-slate-100">
+                    {fromAccountName} •••• {" "}{fromAccount.slice(-4)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-4 py-3">
+                <span className="text-slate-400">Status</span>
+                {transactionResult?.transaction?.status === "COMPLETED"
+                  ? <span className="font-semibold text-emerald-300">Success</span>
+                  : <span className="font-semibold text-red-500">Failed</span>
+                }
+              </div>
+              <div className="flex items-center justify-between gap-4 py-3">
+                <span className="text-slate-400">Transaction ID</span>
+                <span className="max-w-44 truncate font-medium text-slate-200">{transactionResult?.transaction?._id}</span>
+              </div>
+            </div>
+          </>
+            )
+        : isError &&  (
+            <p className="mt-3 text-sm leading-relaxed text-red-500">
+              Invalid Account Number
             </p>
+          )
+      }
 
+        {isProcessing && (
+          <div className="mt-6 flex justify-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]"/>
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce"/>
           </div>
-
-          <div className="mt-6 divide-y divide-slate-800 border-y border-slate-800 text-left text-sm">
-            <div className="flex justify-between gap-4 items-center py-3">
-              <span className="text-slate-400">
-                  From
-              </span>
-
-              <span className="font-semibold text-slate-100">
-                  Harsh ....123
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-4 py-3">
-              <span className="text-slate-400">Status</span>
-              <span className="font-semibold text-emerald-300">Completed</span>
-            </div>
-            <div className="flex items-center justify-between gap-4 py-3">
-              <span className="text-slate-400">Transaction ID</span>
-              <span className="max-w-44 truncate font-medium text-slate-200">{transactionResult._id}</span>
-            </div>
-          </div>
-        </>
-      )}
-
-      {isProcessing && (
-        <div className="mt-6 flex justify-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.3s]" />
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce [animation-delay:-0.15s]"/>
-          <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-bounce"/>
-        </div>
-      )}
+        )}
 
 
       {!isProcessing && (

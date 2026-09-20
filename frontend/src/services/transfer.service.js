@@ -20,7 +20,7 @@ const transfer = async (fromAccount, toAccount, amount) =>{
         }
     )
 
-    return response.data.transaction
+    return response.data
 }
 
 

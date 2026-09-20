@@ -58,7 +58,9 @@ const TransferForm = ({
       
     } catch (error) {
       console.log("Something went wrong while transfering ", error);
-      setTransferStatus(error.response?.data)
+      console.log(error.response?.data);
+      
+      setTransactionResult(error.response?.data)
       setTransferStatus("error")
       clearPendingTransfer()
       

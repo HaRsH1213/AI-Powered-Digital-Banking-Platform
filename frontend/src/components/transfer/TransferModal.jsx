@@ -37,11 +37,14 @@ const TransferModal = ({accounts, isOpen, onClose}) => {
 const closeStatusOverlay = () => {
     if (transferStatus === "success") {
       resetForm()
-      onClose()
+      window.location.reload()
+      
       return
     }
 
     setTransferStatus("idle")
+    setIsReviewed(false)
+    setIsReviewOn(false)
   }
 
   return (
@@ -119,7 +122,16 @@ const closeStatusOverlay = () => {
           />
 
 
-          <TransferStatusOverlay status={transferStatus} transactionResult={transactionResult} onClose={closeStatusOverlay} />
+          <TransferStatusOverlay 
+            status={transferStatus} 
+            transactionResult={transactionResult} 
+            fromAccount={fromAccount} 
+            fromAccountName={fromAccountName} 
+            toAccount={toAccount} 
+            receiverName={receiverName}
+            amountTransfer={amountTransfer} 
+            onClose={closeStatusOverlay} 
+          />
         </div>
         
       </div>
