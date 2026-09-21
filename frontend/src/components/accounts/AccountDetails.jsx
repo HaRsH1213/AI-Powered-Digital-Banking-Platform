@@ -7,7 +7,7 @@ const AccountDetails = ({account}) => {
       </h2>
 
       <p className="mt-1 text-slate-400">
-        Details for {account.name}
+        Details for {account.accountName}
       </p>
 
       {/* Details list */}
@@ -20,7 +20,7 @@ const AccountDetails = ({account}) => {
           </dt>
           
           <dd className="text-right font-medium">
-            {account.number}
+            {account.accountNumber}
           </dd>
 
         </div>
@@ -46,7 +46,7 @@ const AccountDetails = ({account}) => {
           </dt>
           
           <dd className="text-right font-medium">
-            {account.ifsc}
+            {account.ifscCode}
           </dd>
         </div>
         <div className="flex justify-between gap-4 py-4 border-b border-slate-500">
@@ -57,7 +57,7 @@ const AccountDetails = ({account}) => {
           </dt>
           
           <dd className="text-right font-medium">
-            {account.type}
+            {account.accountType}
           </dd>
         </div>
         <div className="flex justify-between gap-4 py-4 border-b border-slate-500">
@@ -68,7 +68,7 @@ const AccountDetails = ({account}) => {
           </dt>
           
           <dd className="text-right font-medium">
-            {account.openedDate}
+            {account.createdAt}
           </dd>
         </div>
       </dl>
