@@ -1,11 +1,13 @@
 const accountModel = require("../models/accounts.model")
 const generateAccountNumber  = require("../utils/accountNumber")
+const getIfscCode = require("../utils/getIfscCode")
 
 
 async function createAccountController(req, res){
 
     const user = req.user
-    const {accountName, accountType, } = req.body
+    const {accountName, accountType, accountKind, state } = req.body
+    const ifscCode = getIfscCode(state)
 
     let accountNumber
     let isAccountExists = true
@@ -17,7 +19,9 @@ async function createAccountController(req, res){
         user: user._id,
         accountNumber,
         accountName,
-        accountType
+        accountType,
+        accountKind,
+        ifscCode
     })
     res.status(201).json({
         message: "Account created",

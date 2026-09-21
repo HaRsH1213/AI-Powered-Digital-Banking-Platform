@@ -22,6 +22,19 @@ const accountSchema = new mongoose.Schema({
         },
         default : "Savings"
     },
+    accountKind:{
+        type: String,
+        enum :{
+            values: ["Savings", "Salary", "Emergency"],
+            message: "AccountKind can be either  Savings, Salary or Emergency"
+        },
+        default : "Savings"
+    },
+    ifscCode: {
+        type: String,
+        required: true,
+        immutable: true
+    },
     accountNumber:{
         type: String,
         required: true,
