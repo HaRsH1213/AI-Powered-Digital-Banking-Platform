@@ -6,6 +6,7 @@ import AccountTypeTabs from "../components/accounts/AccountTypeTabs"
 import SelectedAccountCard from "../components/accounts/SelectedAccountCard"
 import AddAccountButton from "../components/accounts/AddAccountButton"
 import AccountDetails from "../components/accounts/AccountDetails"
+import CreateAccountModal from "../components/accounts/createNewAccount/CreateAccountModal"
 import getAccounts from "../services/accounts.service"
 
 const AccountsPage = () => {
@@ -16,6 +17,7 @@ const AccountsPage = () => {
   const [accounts, setAccounts] = useState([])
   const [selectedAccountId, setSelectedAccountId] = useState(null)
   const [isloading, setIsLoading] = useState(true)
+  const [isCreateAccountOpen, setIsCreateAccountOpen] = useState(false)
 
 
 
@@ -41,6 +43,13 @@ const AccountsPage = () => {
 
   // Find Currently Selected Account
   const selectedAccount = accounts.find((account) => account._id === selectedAccountId) || null
+
+  const handleAccountCreated = (account) => {
+    setAccounts((currentAccounts) => [...currentAccounts, account])
+    setSelectedAccountId(account._id)
+    setIsCreateAccountOpen(false)
+  }
+
   return (
     <DashboardLayout>
       <Sidebar menuOpen={menuOpen} setMenuOpen ={setMenuOpen } />
@@ -81,7 +90,7 @@ const AccountsPage = () => {
             <>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <AccountTypeTabs selectedAccountId={selectedAccountId} setSelectedAccountId={setSelectedAccountId} accounts={accounts} />
-                <AddAccountButton onAddAccount={() => {}} />
+                <AddAccountButton onAddAccount={() => setIsCreateAccountOpen(true)} />
               </div>
 
               <SelectedAccountCard account={selectedAccount} />
@@ -95,12 +104,18 @@ const AccountsPage = () => {
                   Create your first NovaBank account to get started.
                 </p>
                 <div className="mt-5">
-                  <AddAccountButton onAddAccount={() => {}} />
+                  <AddAccountButton onAddAccount={() => setIsCreateAccountOpen(true)} />
                 </div>
               </div>
             </div>
           )}
         </main>
+
+        <CreateAccountModal
+          isOpen={isCreateAccountOpen}
+          onClose={() => setIsCreateAccountOpen(false)}
+          onCreated={handleAccountCreated}
+        />
 
       </section>
 
