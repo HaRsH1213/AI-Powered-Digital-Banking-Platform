@@ -29,7 +29,7 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
             </p>
 
             <h2 className="mt-1 text-xl font-semibold">
-              {transaction?.name}
+              {transaction?.to.holderName}
             </h2>
           </div>
 
@@ -48,7 +48,7 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
 
             <dd
               className={
-                transaction?.income
+                transaction?.direction === "INCOMING"
                   ? "text-emerald-400"
                   : "text-slate-100"
               }
@@ -61,11 +61,11 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
             <dt className="text-slate-400">From</dt>
 
             <dd className="mt-1 font-medium">
-              {transaction?.from.name}
+              {transaction?.from.accountName}
             </dd>
 
             <dd className="text-xs text-slate-400">
-              {transaction?.from.number}
+              {`••••${transaction?.from.accountNumber.slice(-4)}`}
             </dd>
           </div>
 
@@ -73,11 +73,11 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
             <dt className="text-slate-400">To</dt>
 
             <dd className="mt-1 font-medium">
-              {transaction?.to.name}
+              {transaction?.to.holderName}
             </dd>
 
             <dd className="text-xs text-slate-400">
-              {transaction?.to.number}
+              {`••••${transaction?.to.accountNumber.slice(-4)}`}
             </dd>
           </div>
 
@@ -92,9 +92,21 @@ const TransactionDetailsModal = ({ transaction, onClose }) => {
           <div className="flex justify-between gap-4">
             <dt className="text-slate-400">Status</dt>
 
-            <dd className="text-emerald-400">
-              Completed
-            </dd>
+            {transaction?.status !== "PENDING" && (
+              <dd className={`${
+                transaction?.status === "COMPLETED"
+                  ? "text-emerald-400"
+                  : "text-red-600"
+                }`}>
+                {transaction?.status}
+              </dd>
+            )}
+
+            {transaction?.status === "PENDING" && (
+              <dd className="text-amber-400">
+                  Pending
+              </dd>
+            )}
           </div>
         </dl>
       </article>

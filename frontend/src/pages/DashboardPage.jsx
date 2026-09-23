@@ -13,6 +13,7 @@ import { transactionData } from '../data/transactions'
 import getAccounts from '../services/accounts.service'
 import { useAuth } from '../context/AuthProvider'
 import TransferModal from '../components/transfer/TransferModal'
+import fetchTrnsactions from '../services/fetchTransactions.service'
 
 
 
@@ -22,6 +23,8 @@ const DashboardPage =  () => {
   const [showTransfer, setShowTransfer] = useState(false)
 
   const {user, loading} = useAuth()
+
+  const [transactions, setTransactions] = useState([])
 
   // const accountsNew = await api.post("/accounts/")
   useEffect(() => {
@@ -40,6 +43,24 @@ const DashboardPage =  () => {
     }
 
     fetchAccountsData()
+  },[])
+
+  useEffect(() => {
+    const fetchTransactionsData = async ()=>{
+      try {
+        const response = await fetchTrnsactions()
+        setTransactions(response)
+        console.log(response);
+        
+      } catch (error) {
+        console.log("Something went wrong while fetch transactions", error);
+        
+        
+      }
+      
+    }
+
+    fetchTransactionsData()
   },[])
   
   
@@ -103,7 +124,7 @@ const DashboardPage =  () => {
         <LoanCard/>
         {/* <TransactionRow transaction={sampleTransaction}/> */}
         {/* <TransactionList transactions={transactionData}/> */}
-        <RecentTransactions transactions={transactionData}/>
+        <RecentTransactions transactions={transactions}/>
 
         {/* {showTransfer && <TransferModal accounts={accounts} isOpen={showTransfer} onClose = {() => setShowTransfer(false)}/> } */}
         <TransferModal

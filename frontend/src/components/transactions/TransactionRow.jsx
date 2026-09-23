@@ -6,12 +6,12 @@ const TransactionRow = ({transaction, setSelected}) => {
       className="text-left w-full flex items-center border-b border-slate-800 gap-4 px-4 py-4 transition hover:bg-slate-800/60 hover:cursor-pointer sm:px-6">
       {/* Trasaction Type Logo */}
       <span className= {`grid w-12 h-12 place-items-center rounded-full ${
-        transaction.income
+        transaction.direction === "INCOMING"
         ? "bg-emerald-500/15 text-emerald-400"
         : "bg-slate-800 text-slate-300"
       }`
       }>
-        {transaction.income
+        {transaction.direction === "INCOMING"
         ? <ArrowDownLeft size={18}/>
         : <ArrowUpRight size={18}/>
         }
@@ -21,22 +21,24 @@ const TransactionRow = ({transaction, setSelected}) => {
       {/* Transaction Information  */}
       <span className=" min-w-0 flex-1">
         <span className="block font-medium text-slate-100 ">
-          {transaction.name}
+          {transaction.to.holderName}
         </span>
         <span className="block mt-1 text-xs text-slate-400 ">
-          {transaction.date}
+          {transaction.createdAt}
         </span>
       </span>
 
       {/* Amount */}
       <span className={`font-semibold ${
-        transaction.income
+        transaction.direction === "INCOMING"
         ? "text-emerald-400" 
         : "text-slate-100"
       }`}>
-
-        {transaction.amount}
-
+        {transaction.direction === "INCOMING"
+          ? `+₹${transaction.amount}`
+          : `-₹${transaction.amount}`
+        }
+        
       </span>
     </button>
   )

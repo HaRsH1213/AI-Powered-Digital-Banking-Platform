@@ -1,11 +1,12 @@
 import Sidebar from "../components/dashboard/Sidebar"
 import DashboardLayout from "../components/dashboard/DashboardLayout"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import TransactionHeader from "../components/transactions/TransactionHeader"
 import TransactionFilters from "../components/transactions/TransactionFilters"
 import TransactionList from "../components/transactions/TransactionList"
 import { transactionData } from "../data/transactions"
 import TransactionDetailsModal from "../components/transactions/TransactionDetailsModal"
+import fetchTrnsactions from "../services/fetchTransactions.service"
 // import {Download} from "lucide-react"
 
 
@@ -16,20 +17,39 @@ const TransactionsPage = () => {
   const [filter, setFilter] = useState("All")
 
   const [selected, setSelected] = useState(null)
+  const [transactions, setTransactions] = useState([])
+
+  useEffect(() => {
+      const fetchTransactionsData = async ()=>{
+        try {
+          const response = await fetchTrnsactions()
+          setTransactions(response)
+          console.log(response);
+          
+        } catch (error) {
+          console.log("Something went wrong while fetch transactions", error);
+          
+          
+        }
+        
+      }
+  
+      fetchTransactionsData()
+    },[])
 
 
-  const filterTransactions = transactionData.filter((transaction)=>{
+  const filterTransactions = transactions.filter((transaction)=>{
     const query = search.toLowerCase().trim()
 
     // Search by Name, Amount, or Transaction ID
 
     const matchesSearch = !query || 
-    transaction.name.toLowerCase().trim().includes(query) || 
+    transaction.to.holderName.toLowerCase().trim().includes(query) || 
     transaction.amount.toLowerCase().trim().includes(query)||
     transaction.id.toLowerCase().trim().includes(query)
 
      // Filter by Transaction Type
-    const matchesFilter = filter === "All" ||( filter === "Credit" && transaction.income) || (filter === "Debit" && !transaction.income)
+    const matchesFilter = filter === "All" ||( filter === "Credit" && transaction.direction === "INCOMING") || (filter === "Debit" && transaction.direction === "OUTGOING")
 
 
 
