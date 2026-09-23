@@ -333,4 +333,72 @@ async function createInitialTransaction(req, res){
         transaction,
     })
 }
-module.exports = {createTransaction, createInitialTransaction}
+
+
+async function fetchTransactions(req, res) {
+    const user = req.user
+    
+    try {
+        const userAccounts = await accountModel.find({user: user._id}).select("_id")
+        const accountsIds =  userAccounts.map((account) => account._id)
+
+        const transactions = await transactionModel.find({
+            $or :[
+                {fromAccount : {$in: accountsIds}},
+                {toAccount : {$in: accountsIds}}
+            ]
+        })
+        .populate({
+            path : "fromAccount",
+            select : "accountName accountNumber user",
+            populate : {
+                path : "user",
+                select : "name"
+            }
+        })
+        .populate({
+            path : "toAccount",
+            select : "accountName accountNumber user",
+            populate : {
+                path : "user",
+                select : "name"
+            }
+        })
+        .sort({createdAt : -1})
+        
+        const transactionData = transactions.map((transaction)=>({
+
+            id : transaction._id,
+            status: transaction.status,
+            amount : transaction.amount,
+            direction : transaction.fromAccount.user._id.toString() === user._id.toString() ? "OUTGOING" : "INCOMING",
+            createdAt : transaction.createdAt,
+
+            from : {
+                accountName : transaction.fromAccount.accountName,
+                accountNumber : transaction.fromAccount.accountNumber,
+                holderName : transaction.fromAccount.user.name
+            },
+            to : {
+                accountName : transaction.toAccount.accountName,
+                accountNumber : transaction.toAccount.accountNumber,
+                holderName : transaction.toAccount.user.name
+            }
+        }))
+
+        return res.status(200).json({
+            message: "Transaction Fetched Successfully",
+            transactions : transactionData
+        })
+    } catch (error) {
+        console.log("Error while fetching transactions", error)
+        return res.status(500).json({
+            message: "Unable to fetch transactions",
+        })
+        
+    }
+
+
+    
+}
+module.exports = {createTransaction, createInitialTransaction, fetchTransactions}
