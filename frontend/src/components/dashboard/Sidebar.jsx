@@ -1,5 +1,5 @@
 import { NavLink  } from 'react-router-dom'
-import {Landmark, Banknote, LayoutDashboard, Settings, WalletCards} from 'lucide-react'
+import {Landmark, Banknote, LayoutDashboard, Settings, WalletCards, Shield} from 'lucide-react'
 
 const Sidebar = ({menuOpen, setMenuOpen }) => {
   const navItems = [
@@ -52,8 +52,10 @@ const Sidebar = ({menuOpen, setMenuOpen }) => {
         
         }
       </nav>
-      <div className= "absolute bottom-6 right-6 left-6 p-4 rounded-xl bg-slate-800 text-sm text-slate-300">
-        <span className="mr-2 text-emerald-400">♢</span>
+      <div className= "absolute bottom-6 right-6 left-6 p-4 rounded-xl bg-slate-800 text-sm text-slate-300 flex items-center gap-2">
+        <span className=" text-emerald-400">
+          <Shield size={16} />
+        </span>
         Secure account access
       </div>
 

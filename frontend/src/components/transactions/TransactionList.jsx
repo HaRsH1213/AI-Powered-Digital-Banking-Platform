@@ -10,7 +10,7 @@ const TransactionList = ({transactions ,setSelected}) => {
 
   return ( 
     <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden ">
-      {/* {console.log(Object.entries(grouped))} */}
+      {console.log(Object.entries(grouped))}
       
 
       {Object.entries(grouped).map(([month, items])=>(

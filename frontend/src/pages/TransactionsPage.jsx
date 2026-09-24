@@ -18,9 +18,11 @@ const TransactionsPage = () => {
 
   const [selected, setSelected] = useState(null)
   const [transactions, setTransactions] = useState([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
       const fetchTransactionsData = async ()=>{
+        setLoading(true)
         try {
           const response = await fetchTrnsactions()
           setTransactions(response)
@@ -30,6 +32,8 @@ const TransactionsPage = () => {
           console.log("Something went wrong while fetch transactions", error);
           
           
+        } finally {
+          setLoading(false)
         }
         
       }
@@ -45,7 +49,7 @@ const TransactionsPage = () => {
 
     const matchesSearch = !query || 
     transaction.to.holderName.toLowerCase().trim().includes(query) || 
-    transaction.amount.toLowerCase().trim().includes(query)||
+    transaction.amount.toString().toLowerCase().trim().includes(query)||
     transaction.id.toLowerCase().trim().includes(query)
 
      // Filter by Transaction Type
@@ -71,21 +75,26 @@ const TransactionsPage = () => {
         <TransactionFilters search={search} setSearch={setSearch} filter={filter} setFilter={setFilter}  />
 
         {/* Transactions List */}
-        <div className=" mt-6">
-
-          {filterTransactions.length === 0 ? (
+        {loading ? (
+          <div className=" h-150 grid place-items-center">
             <p className="p-6 text-center text-slate-400">
-              No transactions found.
+              Loading transactions...
             </p>
-          ) : (
-            <TransactionList
-              transactions={filterTransactions}
-              setSelected={setSelected}
-            />
-          )}
-
-
-        </div>
+          </div>
+        ) : (
+          <div className="mt-6">
+            {filterTransactions.length === 0 ? (
+              <p className="p-6 text-center text-slate-400">
+                No transactions found.
+              </p>
+            ) : (
+              <TransactionList
+                transactions={filterTransactions}
+                setSelected={setSelected}
+              />
+            )}
+          </div>
+        )}
 
         <TransactionDetailsModal transaction={selected} onClose={() => setSelected(null)} />
           

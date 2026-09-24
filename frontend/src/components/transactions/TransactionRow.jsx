@@ -24,12 +24,32 @@ const TransactionRow = ({transaction, setSelected}) => {
           {transaction.to.holderName}
         </span>
         <span className="block mt-1 text-xs text-slate-400 ">
-          {transaction.createdAt}
+          {transaction.dateTime}
         </span>
       </span>
-
+      
+      {transaction.status === "COMPLETED"
+      ? (
+        <span className={`font-semibold ${
+          transaction.direction === "INCOMING"
+          ? "text-emerald-400" 
+          : "text-slate-100"
+        }`}>
+          {transaction.direction === "INCOMING"
+            ? `+₹${transaction.amount}`
+            : `-₹${transaction.amount}`
+          }
+          
+        </span>
+      )
+      : (
+        <span className="text-red-600 font-medium ">
+          Failed
+        </span>
+      )
+      }
       {/* Amount */}
-      <span className={`font-semibold ${
+      {/* <span className={`font-semibold ${
         transaction.direction === "INCOMING"
         ? "text-emerald-400" 
         : "text-slate-100"
@@ -39,7 +59,7 @@ const TransactionRow = ({transaction, setSelected}) => {
           : `-₹${transaction.amount}`
         }
         
-      </span>
+      </span> */}
     </button>
   )
 }
