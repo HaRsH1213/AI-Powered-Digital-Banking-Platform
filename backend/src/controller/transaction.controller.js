@@ -4,6 +4,7 @@ const accountModel = require("../models/accounts.model")
 const mongoose = require("mongoose")
 const emailService = require("../services/email.service")
 const userModel = require("../models/user.model")
+const getIndianTimeZone = require("../utils/indianTimeZone")
 
 /**
  * - Create a new transaction
@@ -343,9 +344,17 @@ async function fetchTransactions(req, res) {
         const accountsIds =  userAccounts.map((account) => account._id)
 
         const transactions = await transactionModel.find({
-            $or :[
-                {fromAccount : {$in: accountsIds}},
-                {toAccount : {$in: accountsIds}}
+            $or: [
+                // Sender can see every status: completed, rejected, failed, etc.
+                {
+                fromAccount: { $in: accountsIds }
+                },
+
+                // Receiver can see only successfully completed transfers
+                {
+                toAccount: { $in: accountsIds },
+                status: "COMPLETED"
+                }
             ]
         })
         .populate({
@@ -372,7 +381,8 @@ async function fetchTransactions(req, res) {
             status: transaction.status,
             amount : transaction.amount,
             direction : transaction.fromAccount.user._id.toString() === user._id.toString() ? "OUTGOING" : "INCOMING",
-            createdAt : transaction.createdAt,
+            dateTime : getIndianTimeZone(transaction.createdAt),
+            month : getIndianTimeZone(transaction.createdAt).split(" ")[1],
 
             from : {
                 accountName : transaction.fromAccount.accountName,
