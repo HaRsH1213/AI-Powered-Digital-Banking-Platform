@@ -7,6 +7,8 @@ const router  = express.Router()
 
 
 router.post("/register", authController.registerUserController)
+router.post("/verify-email", authController.verifyEmailOtpController)
+router.post("/resend-otp", authController.resendOtpController)
 router.post("/login", authController.loginUserController)
 
 

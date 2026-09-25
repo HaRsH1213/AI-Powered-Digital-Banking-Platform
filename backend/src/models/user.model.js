@@ -29,7 +29,22 @@ const userSchema = new mongoose.Schema({
         default: false,
         immutable: true,
         select: false
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    emailVerificationOtpHash: {
+        type: String,
+        select: false
+    },
+
+    emailVerificationOtpExpiresAt: {
+        type: Date,
+        select: false
     }
+
 
 }, {
     timestamps : true
@@ -45,12 +60,29 @@ userSchema.pre("save",async function () {
     return 
 
 })
+userSchema.pre("save", async function(){
+    if(
+        !this.isModified("emailVerificationOtpHash") ||
+        !this.emailVerificationOtpHash
+    ){
+        return 
+    }
+    const otpHash = await bcrypt.hash(this.emailVerificationOtpHash,10)
+    this.emailVerificationOtpHash = otpHash
+    return 
+
+})
 
 
 userSchema.methods.comparePassword = async function (password) {
 
     return await bcrypt.compare(password, this.password)
     
+}
+
+userSchema.methods.compareOtp = async function (otp){
+    return await bcrypt.compare(otp, this.emailVerificationOtpHash)
+
 }
 
 

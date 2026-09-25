@@ -37,6 +37,7 @@ const sendEmail = async (to, subject, text, html) => {
     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
   } catch (error) {
     console.error('Error sending email:', error);
+    throw error
   }
 };
 
@@ -195,4 +196,42 @@ async function sendTransactionFailedEmail(userEmail, name, amount, toAccount) {
   await sendEmail(userEmail, subject, text, html);
 }
 
-module.exports = {sendRegistrationEmail,sendTransactionSuccessEmail, sendTransactionFailedEmail};
+async function sendEmailVerificationOtpEmail(userEmail, name, otp) {
+  const subject = "Email Verification OTP - AI-Powered Digital Banking Platform";
+
+  const text = `Hello ${name},
+
+Your email verification OTP is: ${otp}
+
+This OTP is valid for 5 minutes.
+
+If you did not request this OTP, please ignore this email.
+
+Best regards,
+AI-Powered Digital Banking Platform Team`;
+
+  const html = `
+      <p>Hello <strong>${name}</strong>,</p>
+
+      <p>
+          Your email verification OTP is: <strong>${otp}</strong>
+      </p>
+
+      <p>
+          This OTP is valid for 5 minutes.
+      </p>
+
+      <p>
+          If you did not request this OTP, please ignore this email.
+      </p>
+
+      <p>
+          Best regards,<br>
+          <strong>AI-Powered Digital Banking Platform Team</strong>
+      </p>
+  `;
+
+  await sendEmail(userEmail, subject, text, html);
+}
+
+module.exports = {sendRegistrationEmail,sendTransactionSuccessEmail, sendTransactionFailedEmail, sendEmailVerificationOtpEmail};
