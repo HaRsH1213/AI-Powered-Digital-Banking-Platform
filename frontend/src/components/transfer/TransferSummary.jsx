@@ -18,7 +18,7 @@ const TransferSummary = ({
         ${
           isReviewOn && !isReviewed
           ? "translate-z-0 opacity-100 scale-100"
-          : "transalte-z-10 opacity-0 scale-95"
+          : "translate-z-10 opacity-0 scale-95"
         }`}>
         <div className="flex items-center justify-between  border-b border-slate-800 pb-5 ">
           <div>
