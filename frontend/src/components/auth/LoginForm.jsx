@@ -3,7 +3,7 @@ import {useNavigate } from "react-router-dom"
 import LoadingOverlay from "./LoadingOverlay"
 import { useAuth } from "../../context/AuthProvider"
 
-const LoginForm = ({accountType}) => {
+const LoginForm = ({accountType, isRegistering, setRegistering }) => {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -43,7 +43,11 @@ const LoginForm = ({accountType}) => {
     
   }
   return (
-    <div className="mt-8">
+    <div className={`absolute inset-x-0 top-0 transform transition-all duration-300 ${
+      isRegistering
+      ? "translate-y-10 opacity-0 scale-95 pointer-events-none"
+      : "translate-y-0 opacity-100 scale-100"
+    }`}>
       {loginStatus !== "idle" && <LoadingOverlay status={loginStatus}/>} 
       <div>
         <h2 className=" text-3xl font-semibold mb-2">
@@ -99,28 +103,30 @@ const LoginForm = ({accountType}) => {
         </div>
 
         <button type="submit"
-        disabled={loginStatus !== "idle"}
-        className=" w-full bg-blue-500 px-4 py-3 rounded-xl font-semibold text-slate-950 transition hover:bg-blue-400 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-60">
-        {loginStatus === "loading"
-        ? "Signing in..."
-        : accountType === "admin"
-          ? "Access admin portal"
-          : "Sign in securely"}
+          disabled={loginStatus !== "idle"}
+          className=" w-full bg-blue-500 px-4 py-3 rounded-xl font-semibold text-slate-950 transition hover:bg-blue-400 hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-60">
+          {loginStatus === "loading"
+          ? "Signing in..."
+          : accountType === "admin"
+            ? "Access admin portal"
+            : "Sign in securely"}
       </button>
 
       </form>
 
       {accountType === "user" && (
         <p className="mt-7 text-center text-sm text-slate-300">
-          New to Bank?{" "}
-          <a
-            className="font-semibold text-blue-300 hover:text-blue-200"
-            href="#register"
-          >
-            Create new account
-          </a>
-        </p>   
-        )
+            New to Bank?{" "}
+            <button
+              type="button"
+              onClick={()=> setRegistering(true)}
+              className="font-semibold text-blue-300 hover:text-blue-200"
+            >
+                Create new account
+            </button>
+        </p> 
+           
+        ) 
       }
       
 

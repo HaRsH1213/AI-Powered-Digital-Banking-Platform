@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ArrowLeft, LoaderCircle, Mail, ShieldCheck } from "lucide-react"
 import { resendOtp, verifyEmail } from "../../services/auth.service"
+import LoadingOverlay from "./LoadingOverlay"
 
 const EMPTY_OTP = ["", "", "", "", "", ""]
 
@@ -11,6 +12,7 @@ const OtpVerification = ({ email, onClose, onVerified, isOtpVerificationOn }) =>
   const [isVerifying, setIsVerifying] = useState(false)
   const [resendTimer, setResendTimer] = useState(150)
   const [isResending, setIsResending] = useState(false)
+  const [otpStatus, setOtpStatus] = useState("idle")
  
   useEffect(() => {
     inputRefs.current[0]?.focus()
@@ -72,17 +74,24 @@ const OtpVerification = ({ email, onClose, onVerified, isOtpVerificationOn }) =>
       return
     }
     setIsVerifying(true)
-
+    setOtpStatus("loading")
     try {
       await verifyEmail(enteredOtp)
-      onVerified()
+      setOtpStatus("success")
+      setTimeout(() => {
+        onVerified()
+      }, 1500)
 
       
     } catch (error) {
       setError(error.response?.data?.message || "Unable to verify OTP. Please try again.")
+      setOtpStatus("error")
 
     } finally{
       setIsVerifying(false)
+       setTimeout(() => {
+        setOtpStatus("idle")
+      }, 1500)
     }
   }
 
@@ -106,8 +115,18 @@ const OtpVerification = ({ email, onClose, onVerified, isOtpVerificationOn }) =>
   }
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
-      <aside className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:p-7" aria-label="Email verification">
+    <div className={`fixed inset-0 z-120 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm transform transition-opacity duration-300 ${
+      isOtpVerificationOn
+        ? "opacity-100"
+        : "opacity-0 pointer-events-none"
+    }`}>
+      <aside className={`w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl sm:p-7 transform transition-all duration-300 ${
+        isOtpVerificationOn
+          ? "translate-z-0 opacity-100 scale-100"
+          : "translate-z-10 opacity-0 scale-95 pointer-events-none"
+      }` }
+        aria-label="Email verification">
+        {otpStatus !== "idle" && <LoadingOverlay status={otpStatus} variant="otp"/>} 
         <div className="mb-7 flex justify-between items-center">
           <button
             type="button" 

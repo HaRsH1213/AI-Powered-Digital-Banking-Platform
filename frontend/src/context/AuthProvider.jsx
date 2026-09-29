@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
-import {login, logout} from "../services/auth.service";
+import {login, logout, register} from "../services/auth.service";
 
 
 
@@ -43,8 +43,13 @@ export const AuthProvider = ({children}) => {
         
         
     }
+
+    const signUp = async (userData) => {
+        return await register(userData)
+    }
+
     return (
-        <AuthContext.Provider value={{user, loading, signIn, signOut}}>
+        <AuthContext.Provider value={{user, loading, signIn, signOut, signUp}}>
             {children}
         </AuthContext.Provider>
     )
