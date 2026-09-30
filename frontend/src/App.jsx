@@ -3,6 +3,7 @@ import AccountsPage from './pages/AccountsPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import TransactionsPage from './pages/TransactionsPage'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 const App = () => {
   // useEffect(() => {
   //   const fetchAccountData = async ()=>{
@@ -24,9 +25,12 @@ const App = () => {
   return (
     <Routes>
       <Route path='/' element= {<LoginPage />} />
-      <Route path='/dashboard' element={<DashboardPage/>} />
-      <Route path='/accounts' element= {<AccountsPage/>} />
-      <Route path='/transactions' element= {<TransactionsPage/>} />
+
+      <Route element= {<ProtectedRoute/>} >
+        <Route path='/dashboard' element={<DashboardPage/>} />
+        <Route path='/accounts' element= {<AccountsPage/>} />
+        <Route path='/transactions' element= {<TransactionsPage/>} />
+      </Route>
     </Routes>
   )
 }
