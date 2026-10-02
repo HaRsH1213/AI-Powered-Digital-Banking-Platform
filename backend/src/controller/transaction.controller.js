@@ -5,6 +5,7 @@ const mongoose = require("mongoose")
 const emailService = require("../services/email.service")
 const userModel = require("../models/user.model")
 const getIndianTimeZone = require("../utils/indianTimeZone")
+const notificationService = require("../services/notification.service")
 
 /**
  * - Create a new transaction
@@ -116,18 +117,31 @@ async function createTransaction (req, res){
 
     const userBalance = await fromUserAccount.getBalance()
     if (userBalance < amount) {
-    const failedTransaction = await transactionModel.create({
-        fromAccount: fromUserAccount._id,
-        toAccount: toUserAccount._id,
-        amount,
-        idempotencyKey,
-        status: "REJECTED"
-    })
+        const failedTransaction = await transactionModel.create({
+            fromAccount: fromUserAccount._id,
+            toAccount: toUserAccount._id,
+            amount,
+            idempotencyKey,
+            status: "REJECTED"
+        })
 
-    return res.status(400).json({
-        message: `Insufficient balance. Current balance is ${userBalance} and requested amount is ${amount}`,
-        transaction: failedTransaction
-    })
+        try {
+            await notificationService.createFailedTransferNotification({
+                fromAccount: fromUserAccount,
+                transaction: failedTransaction,
+                reason : `Transfer of ₹${Number(amount).toLocaleString('en-IN')} from ${fromUserAccount.accountName} was declined due to insufficient balance`
+            })
+            
+        } catch (notificationError) {
+            console.error("Unable to create rejected-transfer notification", notificationError)
+
+            
+        }
+
+        return res.status(400).json({
+            message: `Insufficient balance. Current balance is ${userBalance} and requested amount is ${amount}`,
+            transaction: failedTransaction
+        })
     }
 
 
@@ -188,7 +202,14 @@ async function createTransaction (req, res){
 
         transaction.status = "FAILED"
         await transaction.save()
-
+        try {
+            await notificationService.createFailedTransferNotification({
+                transaction,
+                fromAccount: fromUserAccount
+            })
+        } catch (notificationError) {
+            console.error("Unable to create failed-transfer notification", notificationError)
+        }
         return res.status(500).json({
             message: "Transaction failed",
             transaction
@@ -197,6 +218,17 @@ async function createTransaction (req, res){
     } finally {
         await session.endSession()
     }
+
+    try {
+        await notificationService.createCompletedTransferNotification({
+            transaction: transaction,
+            fromAccount: fromUserAccount,
+            toAccount: toUserAccount
+        })
+        } catch (notificationError) {
+            console.error("Unable to create completed-transfer notifications", notificationError)
+            
+        }
 
 
     /**
@@ -328,6 +360,15 @@ async function createInitialTransaction(req, res){
 
     await session.commitTransaction()
     session.endSession()
+    try {
+        await notificationService.createCreditTransferNotification({
+            transaction,
+            account: toUserAccount
+        })
+        
+    } catch (notificationError) {
+        console.error("Unable to create initial-funds notification", notificationError)
+    }
 
     return res.status(201).json({
         message: "Initial transaction completed successfully",

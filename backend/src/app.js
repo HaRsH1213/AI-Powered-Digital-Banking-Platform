@@ -19,6 +19,7 @@ const accountRouter = require("./routes/account.routes")
 const authRouter = require("./routes/auth.routes")
 const transactionRouter = require("./routes/transaction.routes")
 const receiverRouter = require("./routes/receiver.routes")
+const notificationRouter = require("./routes/notification.routes")
 
 
 /**
@@ -28,5 +29,6 @@ app.use("/api/auth", authRouter)
 app.use("/api/accounts", accountRouter)
 app.use("/api/transaction", transactionRouter)
 app.use("/api/receiver", receiverRouter)
+app.use("/api/notifications", notificationRouter)
 
 module.exports = app
