@@ -1,19 +1,75 @@
-import { useState } from "react"
-import { Bell, Landmark } from "lucide-react";
+import { useCallback, useEffect, useState } from "react"
+import { Landmark } from "lucide-react";
 import UserMenu from "./userProfile/UserMenu";
 import { useAuth } from "../../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from "./notifications/NotificationBell";
+import NotificationPanel from "./notifications/NotificationPanel";
+import { getNotifications, markAllNotificationsAsRead } from "../../services/notification.service";
 const DashboardHeader = ({ menuOpen, setMenuOpen }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [isNotificationsLoading, setIsNotificationsLoading] = useState(true)
 
   const { user, signOut } = useAuth()
   const initialUserNameLetter = user?.name?.charAt(0).toUpperCase()
   const navigate = useNavigate()
 
+  const loadNotifications = useCallback(
+    async () => {
+      try {
+        setIsNotificationsLoading(true)
+        const data = await getNotifications()
+        setNotifications(data.notifications)
+
+        setUnreadCount(data.unreadCount)
+      } catch (error) {
+        console.error("Unable to fetch notifications", error)
+      } finally{
+        setIsNotificationsLoading(false)
+      }
+    },
+    [],
+  )
+  
+
+  useEffect(() => {
+    loadNotifications()
+
+    window.addEventListener("notifications:refresh", loadNotifications)
+
+    return () => window.removeEventListener("notifications:refresh", loadNotifications)
+  }, [loadNotifications])
+
   const onSignOut = async() =>{
     await signOut()
     navigate("/", {replace:true})
 
+  }
+
+  const handleNotificationClick = async () => {
+    if(isNotificationOpen){
+      setIsNotificationOpen(false)
+      return
+    }
+    setIsProfileOpen(false)
+    setIsNotificationOpen(true)
+    // setIsNotificationsLoading(true)
+
+    setNotifications((currentNotification) =>{
+      return currentNotification.map((notification) => ({...notification, isRead:true}))
+    })
+    setUnreadCount(0)
+
+    try {
+      await markAllNotificationsAsRead()
+    } catch (error) {
+      console.error("Unable to mark notifications as read", error)
+      loadNotifications()
+      
+    }
   }
   return (
     <header className="">
@@ -42,16 +98,18 @@ const DashboardHeader = ({ menuOpen, setMenuOpen }) => {
 
         </div>
         <div className=" flex items-center ">
-
-          <button className=" relative hidden h-12 w-12 rounded-full bg-slate-800  sm:flex items-center justify-center">
-
-            <Bell size={18}/>
-
-            <span className="absolute -top-1 -right-1 h-5 w-5 flex justify-center items-center  rounded-full bg-red-400 text-xs text-slate-950">
-              3
-            </span>
-
-          </button>
+          <div className="relative">
+            <NotificationBell
+              unreadCount={unreadCount}
+              isNotificationOpen={isNotificationOpen}
+              onClick={handleNotificationClick}
+            />
+            <NotificationPanel
+              notifications={notifications}
+              isLoading={isNotificationsLoading}
+              isNotificationOpen={isNotificationOpen}
+            />
+          </div>
 
           <div className="relative ml-4">
 
@@ -59,10 +117,13 @@ const DashboardHeader = ({ menuOpen, setMenuOpen }) => {
             type="button"
             aria-label="Open profile"
             aria-pressed={isProfileOpen}
-            onClick={() => setIsProfileOpen((open) => !open)}
+            onClick={() => {
+              setIsNotificationOpen(false)
+              setIsProfileOpen((open) => !open)
+            }}
             className="group relative ml-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/25 font-semibold text-blue-200 transition hover:cursor-pointer"
           >
-            <span className="relative z-10">{initialUserNameLetter}</span>
+            <span className="relative">{initialUserNameLetter}</span>
 
             <span
               className={`pointer-events-none absolute -inset-1 rounded-full bg-slate-200/10 transition duration-200 ${

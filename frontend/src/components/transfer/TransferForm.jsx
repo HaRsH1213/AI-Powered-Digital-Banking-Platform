@@ -51,6 +51,8 @@ const TransferForm = ({
     try {
       const transaction = await transfer(fromAccount, toAccount, amountTransfer)
       console.log(transaction)
+
+      window.dispatchEvent(new Event("notifications:refresh"))
     
       setTransactionResult(transaction)
       setTransferStatus("success")
@@ -59,6 +61,8 @@ const TransferForm = ({
     } catch (error) {
       console.log("Something went wrong while transfering ", error);
       console.log(error.response?.data);
+
+      window.dispatchEvent(new Event("notifications:refresh"))
       
       setTransactionResult(error.response?.data)
       setTransferStatus("error")

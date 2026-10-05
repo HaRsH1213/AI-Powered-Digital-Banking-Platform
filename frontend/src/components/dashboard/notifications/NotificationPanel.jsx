@@ -1,4 +1,4 @@
-import {ArrowDownLeft, ArrowUpRight, BadgeCheck, BellOff, CircleAlert, Landmark, MailCheck, Repeat2, ShieldCheck,} from "lucide-react"
+import {ArrowDownLeft, ArrowUpRight, BellOff, CircleAlert, Landmark, MailCheck, Repeat2, ShieldCheck,} from "lucide-react"
 import NotificationRow from "./NotificationRow"
 
 const notificationStyles = {
@@ -38,10 +38,14 @@ const notificationStyles = {
   },
 }
 
-const NotificationPanel = ({ notifications, isLoading }) => {
+const NotificationPanel = ({ notifications, isLoading, isNotificationOpen }) => {
   return (
     <section
-      className="absolute right-0 top-full z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black/40"
+      className={`fixed inset-x-3 top-20 z-50 max-h-[calc(100dvh-6rem)] overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black/40 transition-all duration-300 ease-out sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-3 sm:max-h-96 sm:w-[22rem] ${
+        isNotificationOpen 
+          ? "translate-y-0 opacity-100 scale-100"
+          : "translate-y-2 opacity-0 scale-95 pointer-events-none"
+      }`}
       aria-label="Notifications"
     >
       <div className="flex items-center justify-between border-b border-slate-800 px-4 py-4">
@@ -51,13 +55,13 @@ const NotificationPanel = ({ notifications, isLoading }) => {
         </div>
       </div>
 
-      <div className="max-h-96 overflow-y-auto scrollbar-none p-2">
+      <div className="max-h-[calc(100dvh-10rem)] overflow-y-auto scrollbar-none p-2 sm:max-h-80">
         {isLoading ? (
           <p className="px-3 py-8 text-center text-sm text-slate-400 ">Loading notifications...</p>
         ): notifications.length ===0 ? (
-          <div>
+          <div className="px-3 py-9 text-center text-slate-400">
             <BellOff className="mx-auto mb-3 " size={24}/>
-            <p className="text-sm">YOur are all caught up</p>
+            <p className="text-sm">You are all caught up.</p>
           </div>
         ):(
           notifications.map((notification) =>{
@@ -65,7 +69,12 @@ const NotificationPanel = ({ notifications, isLoading }) => {
             const Icon = style.icon
             const iconStyle = style.iconClass
             return (
-              <NotificationRow notification={notification} Icon={Icon} iconStyle={iconStyle} />
+              <NotificationRow
+                key={notification._id}
+                notification={notification}
+                Icon={Icon}
+                iconStyle={iconStyle}
+              />
             )
           })
         ) }
