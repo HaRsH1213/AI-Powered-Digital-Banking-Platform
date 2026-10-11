@@ -5,7 +5,7 @@ const authMiddleware = require("../middlewares/auth.middleware")
 adminRoutes = express.Router()
 
 
-adminRoutes.get("/overivew",authMiddleware.authSystemUserMiddleware, adminController.getAdminOverviewController)
+adminRoutes.get("/overview", authMiddleware.authSystemUserMiddleware, adminController.getAdminOverviewController)
 
 
 module.exports = adminRoutes

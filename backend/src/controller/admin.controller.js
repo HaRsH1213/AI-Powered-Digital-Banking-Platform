@@ -83,7 +83,7 @@ async function getAdminOverviewController(req, res) {
         return res.status(200).json({
             message: "Admin overview loaded Successfully",
             overview: {
-                totalCustomer: customerUsers.length,
+                totalCustomers: customerUsers.length,
                 unverifiedCustomers,
                 activeAccounts,
                 totalCustomerBalance: totalBalance.reduce((total, row) => total + (row.balance || 0), 0),
