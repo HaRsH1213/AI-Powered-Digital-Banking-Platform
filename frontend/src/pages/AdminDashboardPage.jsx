@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { replace, useNavigate } from "react-router-dom"
 import { Activity, CircleAlert, IndianRupee, UsersRound, WalletCards } from "lucide-react"
 import { useAuth } from "../context/AuthProvider"
 import { getAdminOverview } from "../services/admin.service"
@@ -14,17 +14,43 @@ const number = new Intl.NumberFormat("en-IN")
 
 const AdminDashboardPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [overview, setOverview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const {user, signOut} = useAuth()
+  const navigate = useNavigate()
   
 
   useEffect(() => {
+    const fetchAdminstatsData = async () =>{
+      try {
+      const data = await getAdminOverview()
+      console.log(data);
+      
+      setOverview(data)
+
+      
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || "We couldn’t load the admin overview. Please try again.")
+    } finally{
+      setLoading(false)
+    }
+    }
+
+    fetchAdminstatsData()
   }, [])
 
   const handleSignOut = async () => {
+    await signOut()
+    navigate('/', {replace: true})
   }
 
-
+  const stats = overview ? [
+    {label: "Customers", value: number.format(overview.totalCustomers), detail : `${number.format(overview.unverifiedCustomers)} email${overview.unverifiedCustomers === 1 ? "" : "s"} awaiting verification` , icon: UsersRound, tone: "blue" },
+    {label: "Active Accounts", value: number.format(overview.activeAccounts), detail: "Across customer profiles", icon: WalletCards, tone: "violet"},
+    {label: "Customer Balance", value: number.format(overview.totalCustomerBalance), detail: "Derived from posted ledger entries", icon: IndianRupee, tone: "emerald"},
+    { label: "Completed · 24 hours", value: number.format(overview.successTransLast24H), detail: `${number.format(overview.rejectedTransLast24H)} failed or rejected in the same period`, icon: Activity, tone: "amber" }
+  ] : []
   return (
     <DashboardLayout>
       <AdminSidebar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}/>
@@ -48,10 +74,17 @@ const AdminDashboardPage = () => {
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {loading 
               ? Array.from({length:4}, (_, index)=> <div className="h-36 animate-pulse rounded-2xl border border-slate-800 bg-slate-900"/>)
-              : ""
+              : stats.map((stat)=><AdminStatCard label={stat.label} value={stat.value} detail={stat.detail} Icon={stat.icon} tone={stat.tone} />)
             }
 
           </div>
+
+          {!loading && !error && overview && (
+            <div className="mt-6"> 
+              <AdminActivityTable transactions={overview.recentTransactions} />
+
+            </div>
+          ) }
 
         </main>
 

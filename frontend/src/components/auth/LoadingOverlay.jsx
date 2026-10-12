@@ -15,7 +15,7 @@ const overlayContent = {
 
     success: {
       title: "Login successful",
-      message: "Redirecting to your dashboard...",
+      message: "Opening your secure banking workspace...",
       icon: Check,
       iconClass: "bg-emerald-400 text-slate-950 shadow-emerald-500/30",
     },
@@ -55,7 +55,7 @@ const overlayContent = {
   },
 }
 
-const LoadingOverlay = ({ status, variant = "login" }) => {
+const LoadingOverlay = ({ status, variant = "login", errorMessage }) => {
   const selectedVariant = overlayContent[variant] || overlayContent.login
   const currentContent = selectedVariant[status]
   const StatusIcon = currentContent.icon
@@ -93,7 +93,7 @@ const LoadingOverlay = ({ status, variant = "login" }) => {
         </h2>
 
         <p className="mt-2 text-sm text-slate-400">
-          {currentContent.message}
+          {status === "error" && errorMessage ? errorMessage : currentContent.message}
         </p>
 
         {isLoading && (

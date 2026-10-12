@@ -9,14 +9,19 @@ const LoginForm = ({accountType, isRegistering, setRegistering }) => {
   const [password, setPassword] = useState("")
   const [loginStatus, setLoginStatus] = useState("idle")
 
-  const {signIn} = useAuth()
+  const {signIn, signOut} = useAuth()
+  const [loginError, setLoginError] = useState("")
 
   const submitHandler = async (e)=>{
     e.preventDefault()
+    setLoginError("")
     setLoginStatus("loading")
     try{
       const loggedInUser  = await signIn({email, password})
-      console.log(loggedInUser)
+      if (accountType === "admin" && !loggedInUser?.isAdmin) {
+        await signOut()
+        throw new Error("These credentials do not have access to the Admin Portal.")
+      }
       setTimeout(()=>{
         setLoginStatus("success")
       },2000)
@@ -25,11 +30,12 @@ const LoginForm = ({accountType, isRegistering, setRegistering }) => {
       setPassword("")
 
       setTimeout(() => {
-        navigate("/dashboard", { replace: true })
+        navigate(loggedInUser?.isAdmin ? "/admin" : "/dashboard", { replace: true })
       }, 3000)
       
     }catch(error){
       console.log(error);
+      setLoginError(error?.message || "Please check your email and password.")
       setTimeout(()=>{
         setLoginStatus("error")
 
@@ -48,7 +54,7 @@ const LoginForm = ({accountType, isRegistering, setRegistering }) => {
       ? "translate-y-10 opacity-0 scale-95 pointer-events-none"
       : "translate-y-0 opacity-100 scale-100"
     }`}>
-      {loginStatus !== "idle" && <LoadingOverlay status={loginStatus}/>} 
+      {loginStatus !== "idle" && <LoadingOverlay status={loginStatus} errorMessage={loginError}/>}
       <div>
         <h2 className=" text-3xl font-semibold mb-2">
           {accountType === "admin" ? "Admin Sign in" : "Welcome Back"}

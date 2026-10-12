@@ -1,7 +1,7 @@
 import {useLocation, Navigate, Outlet} from "react-router-dom"
 import { useAuth } from "../../context/AuthProvider"
 
-const ProtectedRoute = () => {
+const ProtectedRoute = ({ adminOnly = false, customerOnly = false }) => {
   const {user, loading} = useAuth()
   const location = useLocation()
   if(loading){
@@ -16,6 +16,14 @@ const ProtectedRoute = () => {
     return (
         <Navigate to={"/"} replace state={{from: location.pathname}} />
     )
+  }
+
+  if (adminOnly && !user.isAdmin) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  if (customerOnly && user.isAdmin) {
+    return <Navigate to="/admin" replace />
   }
 
   return <Outlet/>
