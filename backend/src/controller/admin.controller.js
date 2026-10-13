@@ -2,6 +2,13 @@ const accountModel = require("../models/accounts.model")
 const ledgerModel = require("../models/ledger.model")
 const transactionModel = require("../models/transaction.model")
 const userModel = require("../models/user.model")
+const mongoose = require("mongoose")
+
+const maskAccountNumber = (value) => value
+    ? `•••• ${String(value).slice(-4)}`
+    : "Unavailable"
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 
 async function getAdminOverviewController(req, res) {
     try {
@@ -17,7 +24,7 @@ async function getAdminOverviewController(req, res) {
             }),
             userModel.countDocuments({
                 systemUser: {$ne: true},
-                isVerified: false
+                isVerified: {$ne: true}
             }),
 
             customerAccountIds.length
@@ -76,10 +83,6 @@ async function getAdminOverviewController(req, res) {
             
         ])
 
-        const maskAccountNumber = (value) => value
-            ? `•••• ${String(value).slice(-4)}`
-            : "Unavailable"
-        
         return res.status(200).json({
             message: "Admin overview loaded Successfully",
             overview: {
@@ -114,4 +117,12 @@ async function getAdminOverviewController(req, res) {
     }
 }
 
-module.exports = { getAdminOverviewController }
+async function getCustomersController(req, res) {
+    
+}
+
+async function getCustomerDetailsController(req, res) {
+    
+}
+
+module.exports = { getAdminOverviewController, getCustomersController, getCustomerDetailsController }
