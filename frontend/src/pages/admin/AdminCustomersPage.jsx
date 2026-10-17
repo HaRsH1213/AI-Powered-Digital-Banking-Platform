@@ -16,6 +16,8 @@ const AdminCustomersPage = () => {
   const {user, signOut} = useAuth()
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [searchInput, setsearchInput]= useState("")
+  const [selectFilter, setSelectFilter] = useState("")
   
   const handleSignOut = async() =>{
     await signOut()
@@ -29,7 +31,7 @@ const AdminCustomersPage = () => {
         <main className="mx-auto mt-8 max-w-350">
           <CustomersPageHeader/>
           <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 shadow-lg shadow-black/10 ">
-          
+            <CustomerFilters searchInput={searchInput} setsearchInput = {setsearchInput} selectFilter={selectFilter} setSelectFilter = {setSelectFilter} />
 
           </section>
           
