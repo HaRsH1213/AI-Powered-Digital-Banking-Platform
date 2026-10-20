@@ -191,6 +191,8 @@ async function getCustomerDetailsController(req, res) {
 
         const accounts = await accountModel.find({user:customer._id}).select("accountName accountType accountKind accountNumber status ifscCode currency createdAt").lean()
 
+
+        // This is all for Get Calculate Balance of Account
         const accountIds = accounts.map((account)=> account._id)
         const accountBalance = accountIds.length
             ? await ledgerModel.aggregate([
