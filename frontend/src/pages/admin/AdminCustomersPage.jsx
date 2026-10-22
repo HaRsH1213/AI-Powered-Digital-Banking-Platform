@@ -88,6 +88,8 @@ const AdminCustomersPage = () => {
           
         </main>
       </section>
+
+      {selectedCustomerId && <CustomerDetailsModal customerId={selectedCustomerId} onClose={() => setSelectedCustomerId(null)} />}
     </DashboardLayout>
   )
 }
