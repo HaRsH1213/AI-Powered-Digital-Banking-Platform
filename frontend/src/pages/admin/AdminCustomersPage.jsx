@@ -49,12 +49,16 @@ const AdminCustomersPage = () => {
     }
     fetchCustomerData()
   }, [page, searchInput, selectFilter, refreshKey])
+  console.log(customerData);
+  
   
   
   const handleSignOut = async() =>{
     await signOut()
     navigate("/", {replace:true})
   }
+
+  const pagination = customerData?.pagination
   return (
     <DashboardLayout>
       <AdminSidebar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}  />
@@ -79,7 +83,7 @@ const AdminCustomersPage = () => {
                   ))}
 
                 </div>
-              
+                <CustomerPagination page={page} pagination={pagination} setPage={setPage} />
               </>
             ):(
               <CustomerEmptyState/>
