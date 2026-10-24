@@ -241,4 +241,62 @@ async function getCustomerDetailsController(req, res) {
     }
 }
 
-module.exports = { getAdminOverviewController, getCustomersController, getCustomerDetailsController }
+async function getAdminAccountsController(req, res) {
+    try {
+        const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1)
+        const pageSize = 10
+        const search = String(req.query.search || "").trim().slice(0, 100)
+        const status = String(req.query.status || "all").toUpperCase()
+        const supportedStatuses = ["ALL", "ACTIVE", "FROZEN", "CLOSED"]
+        
+        const filter = { user:{nin: await userModel.find({systemUser : true}).distinct("_id") }}
+
+        if(search){
+            const safeSearch = escapeRegex(search)
+            const matchingCustomerIds = await userModel.find({
+                systemUser : {$ne: true},
+                $or : [
+                    {name: {$regex: safeSearch, $options: i}},
+                    {email: {$regex: safeSearch, $options: i}}
+                ]
+            
+            }).distinct("_id")
+
+            filter.$or = [
+                {accountName: {$regex: safeSearch, $options: i}},
+                {accountNumber: {$regex: safeSearch, $options: i}},
+                {user: {$in: matchingCustomerIds}}
+            ]
+        }
+
+
+        const [accounts, total] = await Promise.all([
+            accountModel.find(filter).select("user accountName accountType accountKind accountNumber ifscCode currency status createdAt")
+            .populate({
+                path:"user", 
+                select: "name email"
+            })
+            .sort({createdAt: -1, _id: -1})
+            .limit(pageSize)
+            .skip((page - 1) * pageSize)
+            .lean(),
+            accountModel.countDocuments(filter)
+        ])
+        
+    } catch (error) {
+        console.error("Unable to load admin accounts", error)
+        return res.status(500).json({ message: "Unable to load accounts" })
+    }
+}
+
+async function updateAdminAccountStatusController(req, res) {
+    
+}
+
+module.exports = {
+    getAdminOverviewController,
+    getCustomersController,
+    getCustomerDetailsController,
+    getAdminAccountsController,
+    updateAdminAccountStatusController
+}
