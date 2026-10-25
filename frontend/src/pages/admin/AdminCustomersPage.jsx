@@ -39,7 +39,7 @@ const AdminCustomersPage = () => {
       try {
         setLoading(true)
         setError("")
-        const adminCustomers = await getAdminCustomers({page, searchInput, selectFilter})
+        const adminCustomers = await getAdminCustomers({page, search:searchInput, verification:selectFilter})
         setCustomerData(adminCustomers)
       } catch (error) {
         setError(error.response?.data?.message || "Unable to load customers. Please try again.")

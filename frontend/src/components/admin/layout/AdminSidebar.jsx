@@ -4,7 +4,7 @@ import { NavLink  } from 'react-router-dom'
 const navitems = [
   { label: "Overview", icon: LayoutDashboard, path: "/admin", enabled: true },
   { label: "Customers", icon: UsersRound, path: "/admin/customers", enabled: true },
-  { label: "Accounts", icon: WalletCards, enabled: false },
+  { label: "Accounts", icon: WalletCards, path: "/admin/accounts", enabled: true },
   { label: "Transactions", icon: ArrowLeftRight, enabled: false }
 ]
 

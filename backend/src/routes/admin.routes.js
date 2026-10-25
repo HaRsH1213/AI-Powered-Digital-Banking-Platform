@@ -8,6 +8,8 @@ const adminRoutes = express.Router()
 adminRoutes.get("/overview", authMiddleware.authSystemUserMiddleware, adminController.getAdminOverviewController)
 adminRoutes.get("/customers",authMiddleware.authSystemUserMiddleware, adminController.getCustomersController)
 adminRoutes.get("/customers/:customerId", authMiddleware.authSystemUserMiddleware, adminController.getCustomerDetailsController)
+adminRoutes.get("/accounts", authMiddleware.authSystemUserMiddleware, adminController.getAdminAccountsController)
+adminRoutes.patch("/accounts/:accountId/status", authMiddleware.authSystemUserMiddleware, adminController.updateAdminAccountStatusController)
 
 
 

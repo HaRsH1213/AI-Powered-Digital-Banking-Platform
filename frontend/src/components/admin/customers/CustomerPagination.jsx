@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-const CustomerPagination = ({ page, pagination, onPageChange }) => (
+const CustomerPagination = ({ page, pagination, setPage }) => (
   <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 px-4 py-4 sm:px-5">
     <p className="text-xs text-slate-500">
       {pagination.total
@@ -11,7 +11,7 @@ const CustomerPagination = ({ page, pagination, onPageChange }) => (
       <button
         type="button"
         disabled={page <= 1}
-        onClick={() => onPageChange((current) => current - 1)}
+        onClick={() => setPage((current) => current - 1)}
         aria-label="Previous customer page"
         className="rounded-lg border border-slate-700 p-2 text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
       >
@@ -21,7 +21,7 @@ const CustomerPagination = ({ page, pagination, onPageChange }) => (
       <button
         type="button"
         disabled={page >= pagination.totalPages}
-        onClick={() => onPageChange((current) => current + 1)}
+        onClick={() => setPage((current) => current + 1)}
         aria-label="Next customer page"
         className="rounded-lg border border-slate-700 p-2 text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
       >

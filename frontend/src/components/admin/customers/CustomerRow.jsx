@@ -10,7 +10,7 @@ const CustomerRow = ({ customer, onViewCustomer }) => (
       </span>
       <div>
         <p className="truncate text-sm font-medium text-slate-100">{customer.name}</p>
-        <p className="mt-1 truncate text-xs text-slate-500"> customer.email</p>
+        <p className="mt-1 truncate text-xs text-slate-500">{customer.email}</p>
       </div>
     </div>
     <div className=" flex justify-between gap-2 text-xs md:block">
@@ -19,7 +19,7 @@ const CustomerRow = ({ customer, onViewCustomer }) => (
     </div>
     <div className="flex justify-between gap-2 text-xs md:block">
       <span className="text-slate-600 md:hidden">Accounts</span>
-      <span className="text-slate-300">{customer.accountCount}</span>
+      <span className="text-slate-300">{customer.accountsCount}</span>
     </div>
     <div className="flex justify-between gap-2 md:block">
       <span className="text-xs text-slate-600 md:hidden">Verification</span>
