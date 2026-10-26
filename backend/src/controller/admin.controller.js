@@ -249,22 +249,25 @@ async function getAdminAccountsController(req, res) {
         const status = String(req.query.status || "all").toUpperCase()
         const supportedStatuses = ["ALL", "ACTIVE", "FROZEN", "CLOSED"]
         
-        const filter = { user:{nin: await userModel.find({systemUser : true}).distinct("_id") }}
+        if (!supportedStatuses.includes(status)) {
+            return res.status(400).json({ message: "Invalid account status filter" })
+        }
+        const filter = { user:{$nin: await userModel.find({systemUser : true}).distinct("_id") }}
 
         if(search){
             const safeSearch = escapeRegex(search)
             const matchingCustomerIds = await userModel.find({
                 systemUser : {$ne: true},
                 $or : [
-                    {name: {$regex: safeSearch, $options: i}},
-                    {email: {$regex: safeSearch, $options: i}}
+                    {name: {$regex: safeSearch, $options: "i"}},
+                    {email: {$regex: safeSearch, $options: "i"}}
                 ]
             
             }).distinct("_id")
 
             filter.$or = [
-                {accountName: {$regex: safeSearch, $options: i}},
-                {accountNumber: {$regex: safeSearch, $options: i}},
+                {accountName: {$regex: safeSearch, $options: "i"}},
+                {accountNumber: {$regex: safeSearch, $options: "i"}},
                 {user: {$in: matchingCustomerIds}}
             ]
         }
@@ -282,7 +285,49 @@ async function getAdminAccountsController(req, res) {
             .lean(),
             accountModel.countDocuments(filter)
         ])
-        
+        const accountIds = accounts.map((account) => account._id)
+
+        const balance = accountIds.length 
+            ? await ledgerModel.aggregate([
+                {$match : {account : {$in : accountIds}}},
+                {
+                    $group:{
+                        _id: "$account",
+                        credit: {$sum: {$cond: [{$eq: ["$type", "CREDIT"]}, "$amount", 0]}},
+                        debit: {$sum: {$cond: [{$eq: ["$type", "DEBIT"]}, "$amount", 0]}}
+                    }
+                },
+                {$project: {balance: {$subtract : ["$credit", "$debit"]} } }
+            ])
+            : []
+        const balanceByAccount = new Map(balance.map((item) => [String(item._id), item.balance]))
+        return res.status(200).json({
+            message: "Accounts loaded successfully",
+            accounts: accounts.map((account) =>({
+                id: account._id,
+                name: account.accountName,
+                type: account.accountType,
+                kind: account.accountKind,
+                accountNumber: account.accountNumber,
+                ifscCode: account.ifscCode,
+                currency: account.currency,
+                status: account.status,
+                balance: balanceByAccount.get(String(account._id)) || 0,
+                createdAt: account.createdAt,
+                customer: {
+                    name: account.user?.name || "Unavailable",
+                    email: account.user?.email || "Unavailable" 
+                }
+            })),
+
+            pagination:{
+                page,
+                pageSize,
+                total,
+                totalPages: Math.ceil(total / pageSize)
+
+            }
+        })
     } catch (error) {
         console.error("Unable to load admin accounts", error)
         return res.status(500).json({ message: "Unable to load accounts" })
@@ -290,6 +335,38 @@ async function getAdminAccountsController(req, res) {
 }
 
 async function updateAdminAccountStatusController(req, res) {
+    try {
+        const {accountId} = req.params
+        const {status} = req.body
+
+        if (!mongoose.isValidObjectId(accountId)) {
+            return res.status(400).json({ message: "Invalid account ID" })
+
+        }
+
+        const currentAccount = await accountModel.findById(accountId).select("status")
+        if (currentAccount.status === "CLOSED") {
+            return res.status(409).json({ message: "Closed accounts cannot be reactivated or frozen" })
+        }
+        const account = await accountModel.findOneAndUpdate(
+            {_id : accountId, status: {$in : ["ACTIVE", "FROZEN"] }},
+            {$set: {status}},
+            { new: true, runValidators: true }
+        ).select("_id status")
+        
+        if (!account) {
+            return res.status(409).json({ message: "Account status changed. Refresh and try again." })
+        }
+        return res.status(200).json({
+            message: `Account ${status === "FROZEN" ? "frozen" : "activated"} successfully`,
+            account: { id: account._id, status: account.status }
+        })
+    } catch (error) {
+        console.error("Unable to update account status", error)
+        return res.status(500).json({ message: "Unable to update account status" })
+        
+    }
+    
     
 }
 
