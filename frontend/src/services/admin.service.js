@@ -18,15 +18,13 @@ export const getAdminCustomerDetails = async (customerId) => {
   return response.data.customer
 }
 
-export const getAdminAccounts = async ({ page = 1, search = "", status = "all" } = {}) => {
-  const response = await api.get("/admin/accounts", {
-    params: { page, search, status },
-  })
-  return response.data
+export const getAdminAccounts = async ({page = 1, search = "", status = "all"} = {}) => {
+  const response = await api.get("admin/accounts",{params: {page, search, status}})
+  return response.data  
 }
 
 export const updateAdminAccountStatus = async (accountId, status) => {
-  const response = await api.patch(`/admin/accounts/${accountId}/status`, { status })
+  const response = await api.get(`admin/accounts/${accountId}/status`,{status})
   return response.data.account
 }
 
