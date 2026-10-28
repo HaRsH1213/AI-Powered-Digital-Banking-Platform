@@ -7,7 +7,7 @@ const AccountStatusDialog = ({ account, nextStatus, isSubmitting, error, onCance
 
   return (
     <div
-      className="fixed inset-0 z-[70] grid place-items-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-6"
+      className="fixed inset-0 z-70 grid place-items-center bg-slate-950/80 p-3 backdrop-blur-sm sm:p-6"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !isSubmitting) onCancel()
       }}

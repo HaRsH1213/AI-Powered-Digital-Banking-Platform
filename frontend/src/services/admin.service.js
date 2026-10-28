@@ -24,7 +24,7 @@ export const getAdminAccounts = async ({page = 1, search = "", status = "all"} =
 }
 
 export const updateAdminAccountStatus = async (accountId, status) => {
-  const response = await api.get(`admin/accounts/${accountId}/status`,{status})
+  const response = await api.patch(`/admin/accounts/${accountId}/status`, { status })
   return response.data.account
 }
 

@@ -17,11 +17,7 @@ const formatBalance = (amount, currency = "INR") => {
   return currencyFormatters.get(currency).format(amount || 0)
 }
 
-const joinedDate = new Intl.DateTimeFormat("en-IN", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-})
+const joinedDate = new Intl.DateTimeFormat("en-IN", {day: "2-digit", month: "short", year: "numeric",})
 
 const statusStyles = {
   ACTIVE: "border-emerald-400/15 bg-emerald-500/10 text-emerald-300",

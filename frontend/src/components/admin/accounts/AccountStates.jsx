@@ -20,4 +20,4 @@ export const AccountEmptyState = () => (
     <p className="mt-4 text-sm font-medium text-slate-200">No accounts found</p>
     <p className="mt-1 text-xs text-slate-500">Try another account, customer, or status filter.</p>
   </div>
-)
+) 

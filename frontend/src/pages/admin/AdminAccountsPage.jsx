@@ -29,8 +29,7 @@ const AdminAccountsPage = () => {
   const [notice, setNotice] = useState("")
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
-  const queryKey = `${page}:${search}:${status}`
-  const isLoading = loading || accountData?.queryKey !== queryKey
+  const isLoading = loading
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -41,25 +40,20 @@ const AdminAccountsPage = () => {
   }, [searchInput])
 
   useEffect(() => {
-    let isCurrent = true
-
-    getAdminAccounts({ page, search, status })
-      .then((data) => {
-        if (isCurrent) {
-          setAccountData({ ...data, queryKey })
-          setError("")
-        }
-      })
-      .catch((requestError) => {
-        if (isCurrent) {
-          setError(requestError.response?.data?.message || "Unable to load accounts. Please try again.")
-          setAccountData((current) => current ? { ...current, queryKey } : { queryKey, accounts: [], pagination: { page, pageSize: 10, total: 0, totalPages: 0 } })
-        }
-      })
-      .finally(() => { if (isCurrent) setLoading(false) })
-
-    return () => { isCurrent = false }
-  }, [page, search, status, refreshKey, queryKey])
+    const fetchAdminAccounts = async() => {
+      try {
+        setLoading(true)
+        setError("")
+        const accounts = await getAdminAccounts({page, search, status})
+        setAccountData(accounts)
+      } catch (error) {
+        setError(error.response?.data?.message || "Unable to load customers. Please try again.")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAdminAccounts()
+  }, [page, search, status, refreshKey])
 
   const handleSignOut = async () => {
     await signOut()
@@ -103,13 +97,13 @@ const AdminAccountsPage = () => {
       <AdminSidebar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       <section className="min-w-0 p-4 sm:p-6 lg:p-8">
         <AdminHeader user={user} onSignOut={handleSignOut} menuOpen={isMenuOpen} setMenuOpen={setIsMenuOpen} />
-        <main className="mx-auto mt-8 max-w-[1400px]">
+        <main className="mx-auto mt-8 max-w-350">
           <AccountsPageHeader />
 
           <section className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/90 shadow-lg shadow-black/10">
             <AccountFilters
               searchInput={searchInput}
-              onSearchChange={setSearchInput}
+              setSearchInput={setSearchInput}
               status={status}
               onStatusChange={(value) => { setPage(1); setStatus(value) }}
             />
