@@ -19,7 +19,7 @@ export const getAdminCustomerDetails = async (customerId) => {
 }
 
 export const getAdminAccounts = async ({page = 1, search = "", status = "all"} = {}) => {
-  const response = await api.get("admin/accounts",{params: {page, search, status}})
+  const response = await api.get("/admin/accounts", { params: { page, search, status } })
   return response.data  
 }
 

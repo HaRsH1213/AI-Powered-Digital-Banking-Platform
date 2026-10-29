@@ -46,7 +46,7 @@ const AccountRow = ({
           type="button"
           aria-expanded={isExpanded}
           aria-controls={detailsId}
-          onClick={() => onToggle(account.id)}
+          onClick={onToggle}
           className="group flex w-full min-w-0 items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70"
         >
           <span className="flex min-w-0 items-center gap-3">

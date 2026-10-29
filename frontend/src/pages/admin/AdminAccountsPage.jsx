@@ -131,7 +131,7 @@ const AdminAccountsPage = () => {
                           account={account}
                           isExpanded={expandedAccountId === account.id}
                           isUpdating={updatingAccountId === account.id}
-                          onToggle={(accountId) => setExpandedAccountId((current) => current === accountId ? null : accountId)}
+                          onToggle= {() =>  setExpandedAccountId(expandedAccountId === account.id ? null : account.id)}
                           onRequestStatusChange={handleRequestStatusChange}
                         />
                       ))}

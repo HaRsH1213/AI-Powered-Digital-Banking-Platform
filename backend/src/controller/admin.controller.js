@@ -254,6 +254,10 @@ async function getAdminAccountsController(req, res) {
         }
         const filter = { user:{$nin: await userModel.find({systemUser : true}).distinct("_id") }}
 
+        if (status !== "ALL") {
+            filter.status = status
+        }
+
         if(search){
             const safeSearch = escapeRegex(search)
             const matchingCustomerIds = await userModel.find({
