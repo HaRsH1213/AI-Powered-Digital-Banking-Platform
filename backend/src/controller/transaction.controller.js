@@ -245,134 +245,159 @@ async function createTransaction (req, res){
 }
 
 async function createInitialTransaction(req, res){
-    console.log("================================")
-    console.log("CREATE INITIAL TRANSACTION")
-    console.log("BODY:", req.body)
-    console.log("toAccount:", req.body.toAccount)
-    console.log("amount:", req.body.amount)
-    console.log("idempotencyKey:", req.body.idempotencyKey)
-    console.log("Content-Type:", req.headers["content-type"])
-    console.log("================================")
-    const {fromAccount, toAccount, amount} = req.body
-    const idempotencyKey = req.get("idempotencyKey") || req.body.idempotencyKey 
+    const { toAccount, amount } = req.body
+    const idempotencyKey = req.get("Idempotency-Key") || req.get("idempotencyKey") || req.body.idempotencyKey
+    const numericAmount = Number(amount)
 
-    if(!toAccount || !amount || !idempotencyKey){
-        return res.status(401).json({
-            message: "ToAccount, Amount and IdempotencyKey are required"
+    if (!toAccount || !idempotencyKey || !Number.isFinite(numericAmount) || numericAmount <= 0) {
+        return res.status(400).json({
+            message: "A destination account, a positive amount, and an idempotency key are required"
         })
     }
 
-    const toUserAccount = await accountModel.findOne({
-        accountNumber: toAccount,
-        
-    })
+    const [toUserAccount, fromSystemAccount] = await Promise.all([
+        accountModel.findOne({ accountNumber: String(toAccount) }),
+        accountModel.findOne({ user: req.user._id, status: "ACTIVE" }).sort({ createdAt: 1 })
+    ])
+
     if (!toUserAccount) {
-    return res.status(400).json({
-        message: "Invalid toAccount"
-    })
+        return res.status(400).json({ message: "The destination account was not found" })
     }
-    console.log("SYSTEM USER:", req.user)
-    console.log("SYSTEM USER ID:", req.user?._id)
 
-
-    const fromUserAccount = await accountModel.findOne({
-        user: req.user._id
-
-    })
-    console.log("SYSTEM ACCOUNT:", fromUserAccount)
-
-    if(!fromUserAccount){
-        return res.status(400).json({
-            message: "System User is not found "
-        })
+    if (!fromSystemAccount) {
+        return res.status(409).json({ message: "No active system funding account is available" })
     }
-    const isTransactionAlreadyExists = await transactionModel.findOne({
-        idempotencyKey: idempotencyKey
-    })
-    if(isTransactionAlreadyExists){
-        const sameDetails = isTransactionAlreadyExists.toAccount.toString() === toUserAccount._id.toString() && Number(isTransactionAlreadyExists.amount) === Number(amount)
 
-        if(!sameDetails){
+    if (toUserAccount.user.toString() === req.user._id.toString()) {
+        return res.status(400).json({ message: "Initial funds can only be sent to a customer account" })
+    }
+
+    if (toUserAccount.status !== "ACTIVE") {
+        return res.status(409).json({ message: "Initial funds can only be added to an active account" })
+    }
+
+    const existingTransaction = await transactionModel.findOne({ idempotencyKey })
+    if (existingTransaction) {
+        const sameDetails =
+            existingTransaction.fromAccount.toString() === fromSystemAccount._id.toString() &&
+            existingTransaction.toAccount.toString() === toUserAccount._id.toString() &&
+            Number(existingTransaction.amount) === numericAmount
+
+        if (!sameDetails) {
             return res.status(409).json({
-                message: "Idempotency key was already used with different transaction details",
-        }) 
+                message: "This idempotency key was already used with different funding details"
+            })
         }
-        if(isTransactionAlreadyExists.status === "COMPLETED"){
+
         return res.status(200).json({
-            message: "Transaction already processed",
-            transaction: isTransactionAlreadyExists
-        })
-        }
-        if(isTransactionAlreadyExists.status === "PENDING"){
-        return res.status(200).json({
-            message: "Transaction is still processing"
-    
-        })
-        }
-        if(isTransactionAlreadyExists.status === "FAILED"){
-        return res.status(500).json({
-            message: "Transaction Falied please try again later",
-            transaction: isTransactionAlreadyExists
-        })
-        }
-        if(isTransactionAlreadyExists.status === "REVERSED"){
-        return res.status(500).json({
-            message: "Transaction was reversed, please try again later",
-        })
-        }
-    }
-    if(toUserAccount.status !=="ACTIVE"){
-        return res.status(400).json({
-            message: "toAccount must be in Active in status "
+            message: existingTransaction.status === "COMPLETED" ? "Initial funding was already processed" : "Initial funding is still processing",
+            transaction: existingTransaction
         })
     }
 
-    const session = await mongoose.startSession()
-    session.startTransaction()
+    /**
+     * 5. Create PENDING transaction
+     */
 
     const transactionResult = await transactionModel.create([{
-        fromAccount: fromUserAccount._id,
+        fromAccount: fromSystemAccount._id,
         toAccount: toUserAccount._id,
-        amount,
+        amount: numericAmount,
         idempotencyKey,
         status: "PENDING"
-    }], { session })
+    }])
 
     const transaction = transactionResult[0]
 
-    const debitLedger = await ledgerModel.create([{
-        account: fromUserAccount._id,
-        amount,
-        transaction: transaction._id,
-        type: "DEBIT"
-    }], { session })
+    /**
+     * 6. Start atomic money movement
+     */
 
-    const creditLedger = await ledgerModel.create([{
-        account: toUserAccount._id,
-        amount,
-        transaction: transaction._id,
-        type: "CREDIT"
-    }], { session })
+    const session = await mongoose.startSession()
 
-    transaction.status = "COMPLETED"
+    try {
+        session.startTransaction()
 
-    await transaction.save({ session })
+        /**
+         * 7. DEBIT system account
+         */
 
-    await session.commitTransaction()
-    session.endSession()
+        await ledgerModel.create([{
+            account: fromSystemAccount._id,
+            amount: numericAmount,
+            transaction: transaction._id,
+            type: "DEBIT"
+        }], { session })
+
+        /**
+         * 8. CREDIT customer account
+         */
+
+        await ledgerModel.create([{
+            account: toUserAccount._id,
+            amount: numericAmount,
+            transaction: transaction._id,
+            type: "CREDIT"
+        }], { session })
+
+        /**
+         * 9. Mark transaction COMPLETED
+         */
+
+        transaction.status = "COMPLETED"
+
+        await transaction.save({ session })
+
+        /**
+         * 10. Commit transaction
+         */
+
+        await session.commitTransaction()
+
+    } catch (error) {
+
+        if (session.inTransaction()) {
+            await session.abortTransaction()
+        }
+
+        transaction.status = "FAILED"
+        await transaction.save()
+
+        console.error("Unable to create initial transaction", error)
+
+        return res.status(500).json({
+            message: "Initial transaction failed",
+            transaction
+        })
+
+    } finally {
+        await session.endSession()
+    }
+
+    /**
+     * 11. Send credit notification
+     */
+
     try {
         await notificationService.createCreditTransferNotification({
             transaction,
             account: toUserAccount
         })
-        
+
     } catch (notificationError) {
-        console.error("Unable to create initial-funds notification", notificationError)
+        console.error(
+            "Unable to create initial-funds notification",
+            notificationError
+        )
     }
+
+    /**
+     * 12. Send response
+     */
 
     return res.status(201).json({
         message: "Initial transaction completed successfully",
-        transaction,
+        transaction
     })
 }
 
