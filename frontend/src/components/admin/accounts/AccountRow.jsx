@@ -29,8 +29,10 @@ const AccountRow = ({
   account,
   isExpanded,
   isUpdating,
+  isFunding,
   onToggle,
   onRequestStatusChange,
+  onRequestInitialFunds,
 }) => {
   const isActive = account.status === "ACTIVE"
   const canChangeStatus = account.status === "ACTIVE" || account.status === "FROZEN"
@@ -103,11 +105,21 @@ const AccountRow = ({
       </div>
 
       {/* Account action */}
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-2 md:items-end">
+        {isActive && (
+          <button
+            type="button"
+            disabled={isUpdating || isFunding}
+            onClick={() => onRequestInitialFunds(account)}
+            className="w-full rounded-lg border border-blue-400/20 px-3 py-2 text-xs font-medium text-blue-200 transition hover:bg-blue-500/10 disabled:cursor-wait disabled:opacity-60 md:w-auto"
+          >
+            {isFunding ? "Adding funds…" : "Add funds"}
+          </button>
+        )}
         {canChangeStatus ? (
           <button
             type="button"
-            disabled={isUpdating}
+            disabled={isUpdating || isFunding}
             onClick={() => onRequestStatusChange(account, nextStatus)}
             className={`w-full rounded-lg border px-3 py-2 text-xs font-medium transition disabled:cursor-wait disabled:opacity-60 md:w-auto ${
               isActive

@@ -28,3 +28,12 @@ export const updateAdminAccountStatus = async (accountId, status) => {
   return response.data.account
 }
 
+export const addInitialFunds = async ({toAccount, amount, idempotencyKey}) => {
+  const response = await api.post("/transaction/system/initial-funds", {
+    toAccount, 
+    amount, 
+    idempotencyKey
+  })
+  return response.data.transaction
+}
+

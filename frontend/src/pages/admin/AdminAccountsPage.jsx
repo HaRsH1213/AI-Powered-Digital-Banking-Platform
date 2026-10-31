@@ -8,9 +8,10 @@ import AccountFilters from "../../components/admin/accounts/AccountFilters"
 import AccountRow from "../../components/admin/accounts/AccountRow"
 import AccountPagination from "../../components/admin/accounts/AccountPagination"
 import AccountStatusDialog from "../../components/admin/accounts/AccountStatusDialog"
+import InitialFundsDialog from "../../components/admin/accounts/InitialFundsDialog"
 import { AccountEmptyState, AccountErrorState, AccountLoadingState } from "../../components/admin/accounts/AccountStates"
 import { useAuth } from "../../context/AuthProvider"
-import { getAdminAccounts, updateAdminAccountStatus } from "../../services/admin.service"
+import { addInitialFunds, getAdminAccounts, updateAdminAccountStatus } from "../../services/admin.service"
 
 const AdminAccountsPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -27,6 +28,10 @@ const AdminAccountsPage = () => {
   const [updatingAccountId, setUpdatingAccountId] = useState(null)
   const [statusError, setStatusError] = useState("")
   const [notice, setNotice] = useState("")
+  const [fundingAccount, setFundingAccount] = useState(null)
+  const [fundingIdempotencyKey, setFundingIdempotencyKey] = useState("")
+  const [fundingError, setFundingError] = useState("")
+  const [isFunding, setIsFunding] = useState(false)
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const isLoading = loading
@@ -64,6 +69,51 @@ const AdminAccountsPage = () => {
     setStatusError("")
     setNotice("")
     setPendingChange({ account, nextStatus })
+  }
+
+  const handleRequestInitialFunds = (account) => {
+    setFundingError("")
+    setNotice("")
+    setFundingAccount(account)
+    setFundingIdempotencyKey(crypto.randomUUID())
+  }
+
+  const handleConfirmInitialFunds = async (amount) => {
+    if (!fundingAccount || !fundingIdempotencyKey) return
+
+    setIsFunding(true)
+    setFundingError("")
+
+    try {
+      await addInitialFunds({
+        toAccount: fundingAccount.accountNumber,
+        amount,
+        idempotencyKey: fundingIdempotencyKey,
+      })
+
+      setAccountData((prev) =>{
+        if(!prev) return perv
+        return {
+          ...prev,
+          accounts: prev.accounts.map((account) =>{
+            if(account.id === fundingAccount.id){
+              return {
+                ...account,
+                balance: Number(account.balance || 0 ) + amount
+              }
+            }
+            return account
+          })
+        }
+      })
+      setNotice(`₹${amount.toLocaleString("en-IN")} was added to ${fundingAccount.accountNumber}.`)
+      setFundingAccount(null)
+      setFundingIdempotencyKey("")
+    } catch (requestError) {
+      setFundingError(requestError.response?.data?.message || "Unable to add initial funds. Please try again.")
+    } finally {
+      setIsFunding(false)
+    }
   }
 
   const handleConfirmStatusChange = async () => {
@@ -131,8 +181,10 @@ const AdminAccountsPage = () => {
                           account={account}
                           isExpanded={expandedAccountId === account.id}
                           isUpdating={updatingAccountId === account.id}
+                          isFunding={isFunding && fundingAccount?.id === account.id}
                           onToggle= {() =>  setExpandedAccountId(expandedAccountId === account.id ? null : account.id)}
                           onRequestStatusChange={handleRequestStatusChange}
+                          onRequestInitialFunds={handleRequestInitialFunds}
                         />
                       ))}
                     </div>
@@ -154,6 +206,21 @@ const AdminAccountsPage = () => {
         error={statusError}
         onCancel={() => { if (!updatingAccountId) setPendingChange(null) }}
         onConfirm={handleConfirmStatusChange}
+      />
+
+      <InitialFundsDialog
+        key={fundingIdempotencyKey}
+        account={fundingAccount}
+        isSubmitting={isFunding}
+        error={fundingError}
+        onCancel={() => {
+          if (!isFunding) {
+            setFundingAccount(null)
+            setFundingIdempotencyKey("")
+            setFundingError("")
+          }
+        }}
+        onConfirm={handleConfirmInitialFunds}
       />
     </DashboardLayout>
   )
