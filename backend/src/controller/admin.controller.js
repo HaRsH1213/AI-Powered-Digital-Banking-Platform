@@ -231,7 +231,7 @@ async function getCustomerDetailsController(req, res) {
                 isVerified: customer.isVerified,
                 createdAt: customer.createdAt,
                 accounts: accountDetails,
-                totalBalance: accountDetails.reduce((total, account)=> total+ account.balance, 0)
+                totalBalance: accountDetails.reduce((total, account)=> total+ account.balance, 0) 
             }
 
         })
