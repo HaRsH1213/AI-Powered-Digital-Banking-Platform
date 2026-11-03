@@ -26,6 +26,17 @@ const transactionSchema = new mongoose.Schema({
         required: [true, "Amount is required to creating a transaction"],
         min: [0,"Transaction amount cannot be negative"]
     },
+
+    failureCode:{
+        type: String,
+        enum: ["INSUFFICIENT_BALANCE", "ACCOUNT_FROZEN", "ACCOUNT_CLOSED", "INVALID_RECIPIENT", "SYSTEM_ERROR",],
+        default: null
+    },
+
+    failureReason: {
+        type: String,
+        default: null,
+    },
     idempotencyKey:{
         type: String,
         required: [true, "IdempotencyKey is required to creating a transaction"],

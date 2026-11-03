@@ -7,6 +7,27 @@ const userModel = require("../models/user.model")
 const getIndianTimeZone = require("../utils/indianTimeZone")
 const notificationService = require("../services/notification.service")
 
+
+async function createRejectedTransaction({
+    fromAccount,
+    toAccount,
+    amount,
+    idempotencyKey,
+    failureCode,
+    failureReason
+}) {
+    return transactionModel.create({
+        fromAccount: fromAccount._id,
+        toAccount: toAccount._id,
+        amount: amount,
+        idempotencyKey: idempotencyKey,
+        status: "REJECTED",
+        failureCode: failureCode,
+        failureReason: failureReason
+    })
+    
+}
+
 /**
  * - Create a new transaction
  * THE 10-STEP TRANSFER FLOW:
@@ -75,37 +96,77 @@ async function createTransaction (req, res){
         })
         }
         if(isTransactionAlreadyExists.status === "PENDING"){
-        return res.status(200).json({
-            message: "Transaction is still processing"
-    
-        })
+            return res.status(200).json({
+                message: "Transaction is still processing"
+        
+            })
         }
         if(isTransactionAlreadyExists.status === "FAILED"){
-        return res.status(500).json({
-            message: "Transaction Falied please try again later",
-            transaction: isTransactionAlreadyExists
-        })
+            return res.status(500).json({
+                message: isTransactionAlreadyExists.failureReason || "Transaction failed. Please try again later.",
+                failureCode: isTransactionAlreadyExists.failureCode,
+                failureReason: isTransactionAlreadyExists.failureReason,
+                transaction: isTransactionAlreadyExists
+            })
         }
         if(isTransactionAlreadyExists.status === "REVERSED"){
-        return res.status(500).json({
-            message: "Transaction was reversed, please try again later",
-        })
+            return res.status(500).json({
+                message: isTransactionAlreadyExists.failureReason || "Transaction was reversed",
+                failureCode: isTransactionAlreadyExists.failureCode,
+                failureReason: isTransactionAlreadyExists.failureReason,
+                transaction: isTransactionAlreadyExists
+            })
         }
         if (isTransactionAlreadyExists.status === "REJECTED") {
-        return res.status(400).json({
-            message: "Transfer was rejected due to insufficient balance",
-            transaction: isTransactionAlreadyExists
-        })
-}
+            return res.status(400).json({
+                message: isTransactionAlreadyExists.failureReason,
+                failureCode: isTransactionAlreadyExists.failureCode,
+                failureReason: isTransactionAlreadyExists.failureReason,
+                transaction: isTransactionAlreadyExists
+            })
+        }
     }
 
-     /**
+    /**
      *3. Check account status
-     */
+    */
 
     if(fromUserAccount.status !== "ACTIVE" || toUserAccount.status !== "ACTIVE"){
+        let failureCode
+        let failureReason
+
+        if(fromUserAccount.status !== "ACTIVE"){
+            failureCode = 
+                fromUserAccount.status === "FROZEN" 
+                    ? "ACCOUNT_FROZEN"
+                    : "ACCOUNT_CLOSED"
+
+            failureReason = `Your account ${fromUserAccount.accountNumber} is ${fromUserAccount.status.toLocaleLowerCase()}`
+
+                
+        }else{
+            failureCode =
+                toUserAccount.status === "FROZEN"
+                    ? "ACCOUNT_FROZEN"
+                    : "ACCOUNT_CLOSED"
+
+            failureReason = `The receiver account (${toUserAccount.accountNumber}) is ${toUserAccount.status.toLowerCase()}.`
+
+        }
+
+        const failedTransaction = await createRejectedTransaction({
+            fromAccount: fromUserAccount,
+            toAccount: toUserAccount,
+            amount: numericAmount,
+            idempotencyKey,
+            failureCode,
+            failureReason
+        })
         return res.status(400).json({
-            message: "Both fromAccount and toAccount must be in Active Status"
+            message: failureReason,
+            failureCode,
+            failureReason,
+            transaction: failedTransaction
         })
     }
     
@@ -117,12 +178,16 @@ async function createTransaction (req, res){
 
     const userBalance = await fromUserAccount.getBalance()
     if (userBalance < amount) {
-        const failedTransaction = await transactionModel.create({
-            fromAccount: fromUserAccount._id,
-            toAccount: toUserAccount._id,
-            amount,
+
+        const failureReason = `Available balance is ₹${userBalance}, but ₹${numericAmount} was requested.`
+
+        const failedTransaction = await createRejectedTransaction({
+            fromAccount: fromUserAccount,
+            toAccount: toUserAccount,
+            amount: numericAmount,
             idempotencyKey,
-            status: "REJECTED"
+            failureCode: "INSUFFICIENT_BALANCE",
+            failureReason
         })
 
         try {
@@ -139,7 +204,9 @@ async function createTransaction (req, res){
         }
 
         return res.status(400).json({
-            message: `Insufficient balance. Current balance is ${userBalance} and requested amount is ${amount}`,
+            message: failureReason,
+            failureCode: failedTransaction.failureCode,
+            failureReason: failedTransaction.failureReason,
             transaction: failedTransaction
         })
     }
@@ -201,17 +268,23 @@ async function createTransaction (req, res){
         await session.abortTransaction()
 
         transaction.status = "FAILED"
+        transaction.failureCode = "SYSTEM_ERROR"
+        transaction.failureReason = "An unexpected error occurred while processing the transaction."
         await transaction.save()
+        console.error("Transaction processing failed:", error)
         try {
             await notificationService.createFailedTransferNotification({
                 transaction,
-                fromAccount: fromUserAccount
+                fromAccount: fromUserAccount,
+                reason: transaction.failureReason
             })
         } catch (notificationError) {
             console.error("Unable to create failed-transfer notification", notificationError)
         }
         return res.status(500).json({
             message: "Transaction failed",
+            failureCode: transaction.failureCode,
+            failureReason: transaction.failureReason,
             transaction
         })
 
@@ -272,9 +345,36 @@ async function createInitialTransaction(req, res){
         return res.status(400).json({ message: "Initial funds can only be sent to a customer account" })
     }
 
+    /**
+     * 3. Check destination account status
+     */
+
     if (toUserAccount.status !== "ACTIVE") {
-        return res.status(409).json({ message: "Initial funds can only be added to an active account" })
+
+        const failureCode =
+            toUserAccount.status === "FROZEN"
+                ? "ACCOUNT_FROZEN"
+                : "ACCOUNT_CLOSED"
+
+        const failureReason = `The receiver account (${toUserAccount.accountNumber}) is ${toUserAccount.status.toLowerCase()}.`
+
+        const failedTransaction = await createRejectedTransaction({
+            fromAccount: fromSystemAccount,
+            toAccount: toUserAccount,
+            amount: numericAmount,
+            idempotencyKey,
+            failureCode,
+            failureReason
+        })
+
+        return res.status(400).json({
+            message: failureReason,
+            failureCode,
+            failureReason,
+            transaction: failedTransaction
+        })
     }
+
 
     const existingTransaction = await transactionModel.findOne({ idempotencyKey })
     if (existingTransaction) {
@@ -289,8 +389,34 @@ async function createInitialTransaction(req, res){
             })
         }
 
+        if (
+            existingTransaction.status === "REJECTED" ||
+            existingTransaction.status === "FAILED"
+        ) {
+
+            return res.status(400).json({
+                message: existingTransaction.failureReason || "Initial transaction failed",
+                failureCode: existingTransaction.failureCode,
+                failureReason: existingTransaction.failureReason,
+                transaction: existingTransaction
+            })
+        }
+
+        if (existingTransaction.status === "REVERSED") {
+            return res.status(400).json({
+                message: existingTransaction.failureReason || "Initial transaction was reversed",
+                failureCode: existingTransaction.failureCode,
+                failureReason: existingTransaction.failureReason,
+                transaction: existingTransaction
+            })
+        }
+
         return res.status(200).json({
-            message: existingTransaction.status === "COMPLETED" ? "Initial funding was already processed" : "Initial funding is still processing",
+            message:
+                existingTransaction.status === "COMPLETED"
+                    ? "Initial funding was already processed"
+                    : "Initial funding is still processing",
+
             transaction: existingTransaction
         })
     }
@@ -361,12 +487,17 @@ async function createInitialTransaction(req, res){
         }
 
         transaction.status = "FAILED"
+        transaction.failureCode = "SYSTEM_ERROR"
+        transaction.failureReason = "An unexpected error occurred while processing the initial transaction."
+
         await transaction.save()
 
         console.error("Unable to create initial transaction", error)
 
         return res.status(500).json({
             message: "Initial transaction failed",
+            failureCode: transaction.failureCode,
+            failureReason: transaction.failureReason,
             transaction
         })
 
@@ -446,6 +577,8 @@ async function fetchTransactions(req, res) {
             id : transaction._id,
             status: transaction.status,
             amount : transaction.amount,
+            failureCode: transaction.failureCode,
+            failureReason: transaction.failureReason,
             direction : transaction.fromAccount.user._id.toString() === user._id.toString() ? "OUTGOING" : "INCOMING",
             dateTime : getIndianTimeZone(transaction.createdAt),
             month : getIndianTimeZone(transaction.createdAt).split(" ")[1],
