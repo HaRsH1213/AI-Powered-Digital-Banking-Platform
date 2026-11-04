@@ -374,10 +374,111 @@ async function updateAdminAccountStatusController(req, res) {
     
 }
 
+async function getAdminTransactionsController(req, res) {
+    try {
+        const page = Math.max(Number.parseInt(req.query.page, 10) || 1,1)
+        const pageSize = 10
+        const search = String(req.query.search || "").trim().slice(0, 100)
+        const status = String(req.query.status || "ALL").toUpperCase()
+        const supportedStatuses = ["ALL", "PENDING", "COMPLETED", "FAILED", "REVERSED", "REJECTED"]
+        if (!supportedStatuses.includes(status)) {
+            return res.status(400).json({ message: "Invalid transaction status filter" })
+        }
+
+        const filter = {}
+        if (status !== "ALL") filter.status = status
+
+        if (search) {
+            const safeSearch = escapeRegex(search)
+            const matchingCustomerIds = await userModel.find({
+                $or :[
+                    {name: {$regex: safeSearch, $options: "i"}},
+                    {email: {$regex: safeSearch, $options: "i"}}
+                ]
+            }).distinct("_id")
+
+            const matchingAccountIds = await accountModel.find({
+                $or:[
+                    {accountName: {$regex: safeSearch, $options: "i"}},
+                    {accountNumber: {$regex: safeSearch, $options: "i"}}
+                ]
+            }).distinct("_id")
+
+            filter.$or = [
+                {fromAccount: {$in: matchingAccountIds}},
+                {toAccount: {$in: matchingAccountIds}}
+            ]
+
+            if (mongoose.isValidObjectId(search)) {
+                filter.$or.push({ _id: search })
+            }
+        }
+        const [transactions, total] = await Promise.all([
+            transactionModel.find(filter)
+                .select("fromAccount toAccount amount status failureCode failureReason idempotencyKey createdAt")
+                .populate({
+                    path: "fromAccount",
+                    select: "accountName accountNumber user",
+                    populate: {
+                        path: "user",
+                        select: "name email +systemUser"
+                    }
+                })
+                .populate({
+                    path: "toAccount",
+                    select: "accountName accountNumber user",
+                    populate: {
+                        path: "user",
+                        select: "name email +systemUser"
+                    }
+                })
+                .sort({ createdAt: -1, _id: -1 })
+                .limit(pageSize)
+                .skip((page - 1) * pageSize)
+                .lean(),
+            transactionModel.countDocuments(filter)
+        ])
+
+        return res.status(200).json({
+            message: "Transactions loaded successfully",
+            transactions: transactions.map((transaction) => ({
+                id: transaction._id,
+                status: transaction.status,
+                amount: transaction.amount,
+                createdAt: transaction.createdAt,
+                idempotencyKey: transaction.idempotencyKey,
+                type: transaction.fromAccount?.user?.systemUser ? "INITIAL_FUNDING" : "TRANSFER",
+                from: {
+                    accountName: transaction.fromAccount?.accountName || "Unavailable",
+                    accountNumber: transaction.fromAccount?.accountNumber,
+                    name: transaction.fromAccount?.user?.name || "Unavailable",
+                    email: transaction.fromAccount?.user?.email || "Unavailable"
+                },
+                to: {
+                    accountName: transaction.toAccount?.accountName || "Unavailable",
+                    accountNumber: transaction.toAccount?.accountNumber,
+                    name: transaction.toAccount?.user?.name || "Unavailable",
+                    email: transaction.toAccount?.user?.email || "Unavailable"
+                }
+            })),
+            pagination: {
+                page,
+                pageSize,
+                total,
+                totalPages: Math.ceil(total / pageSize)
+            }
+        })
+    } catch (error) {
+        console.error("Unable to load admin transactions", error)
+        return res.status(500).json({ message: "Unable to load transactions" })
+    }
+}
+
 module.exports = {
     getAdminOverviewController,
     getCustomersController,
     getCustomerDetailsController,
     getAdminAccountsController,
+    getAdminTransactionsController,
     updateAdminAccountStatusController
 }

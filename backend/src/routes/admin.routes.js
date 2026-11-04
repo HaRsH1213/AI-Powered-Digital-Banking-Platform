@@ -10,6 +10,7 @@ adminRoutes.get("/customers",authMiddleware.authSystemUserMiddleware, adminContr
 adminRoutes.get("/customers/:customerId", authMiddleware.authSystemUserMiddleware, adminController.getCustomerDetailsController)
 adminRoutes.get("/accounts", authMiddleware.authSystemUserMiddleware, adminController.getAdminAccountsController)
 adminRoutes.patch("/accounts/:accountId/status", authMiddleware.authSystemUserMiddleware, adminController.updateAdminAccountStatusController)
+adminRoutes.get("/transactions", authMiddleware.authSystemUserMiddleware, adminController.getAdminTransactionsController)
 
 
 
