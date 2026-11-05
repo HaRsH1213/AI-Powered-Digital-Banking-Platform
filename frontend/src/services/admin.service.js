@@ -37,3 +37,8 @@ export const addInitialFunds = async ({toAccount, amount, idempotencyKey}) => {
   return response.data.transaction
 }
 
+export const getAdminTransactions = async ({ page = 1, search = "", status = "ALL" } = {}) => {
+  const response = await api.get("/admin/transactions", { params: { page, search, status } })
+  return response.data
+}
+
