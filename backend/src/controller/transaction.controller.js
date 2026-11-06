@@ -46,14 +46,15 @@ async function createRejectedTransaction({
 async function createTransaction (req, res){
     const {fromAccount, toAccount, amount} = req.body
     const idempotencyKey = req.get("idempotencyKey") || req.body.idempotencyKey 
+    const numericAmount = Number(amount)
 
     /**
      *1. Validate request
      */
     
-    if(!fromAccount || !toAccount || !amount || !idempotencyKey){
+    if(!fromAccount || !toAccount || !idempotencyKey || !Number.isFinite(numericAmount) || numericAmount <= 0){
         return res.status(400).json({
-            message: "FromAccount , toAccount, amount, IdemptencyKey are required"
+            message: "A source account, destination account, positive amount, and idempotency key are required"
         })
 
     }
@@ -82,7 +83,7 @@ async function createTransaction (req, res){
         const sameDetails =
             isTransactionAlreadyExists.fromAccount.toString() === fromUserAccount._id.toString() &&
             isTransactionAlreadyExists.toAccount.toString() === toUserAccount._id.toString() &&
-            Number(isTransactionAlreadyExists.amount) === Number(amount)
+            Number(isTransactionAlreadyExists.amount) === numericAmount
             
         if(!sameDetails){
             return res.status(409).json({
@@ -177,7 +178,7 @@ async function createTransaction (req, res){
 
 
     const userBalance = await fromUserAccount.getBalance()
-    if (userBalance < amount) {
+    if (userBalance < numericAmount) {
 
         const failureReason = `Available balance is ₹${userBalance}, but ₹${numericAmount} was requested.`
 
@@ -220,7 +221,7 @@ async function createTransaction (req, res){
     const transactionResult = await transactionModel.create([{
         fromAccount: fromUserAccount._id,
         toAccount: toUserAccount._id,
-        amount,
+        amount: numericAmount,
         idempotencyKey,
         status: "PENDING"
     }])
@@ -237,7 +238,7 @@ async function createTransaction (req, res){
         // DEBIT
         await ledgerModel.create([{
             account: fromUserAccount._id,
-            amount,
+            amount: numericAmount,
             transaction: transaction._id,
             type: "DEBIT"
         }], { session })
@@ -252,7 +253,7 @@ async function createTransaction (req, res){
         // CREDIT
         await ledgerModel.create([{
             account: toUserAccount._id,
-            amount,
+            amount: numericAmount,
             transaction: transaction._id,
             type: "CREDIT"
         }], { session })

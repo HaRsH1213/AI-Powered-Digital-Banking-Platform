@@ -7,6 +7,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminCustomersPage from './pages/admin/AdminCustomersPage'
 import AdminAccountsPage from './pages/admin/AdminAccountsPage'
+import AdminTransactionsPage from './pages/admin/AdminTransactionsPage'
 const App = () => {
   // useEffect(() => {
   //   const fetchAccountData = async ()=>{
@@ -38,6 +39,7 @@ const App = () => {
         <Route path='/admin' element={<AdminDashboardPage />} />
         <Route path='/admin/customers' element={<AdminCustomersPage />} />
         <Route path='/admin/accounts' element={<AdminAccountsPage />} />
+        <Route path='/admin/transactions' element={<AdminTransactionsPage />} />
       </Route>
     </Routes>
   )

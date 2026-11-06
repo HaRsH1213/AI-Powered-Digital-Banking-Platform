@@ -447,6 +447,8 @@ async function getAdminTransactionsController(req, res) {
                 amount: transaction.amount,
                 createdAt: transaction.createdAt,
                 idempotencyKey: transaction.idempotencyKey,
+                failureCode: transaction.failureCode || null,
+                failureReason: transaction.failureReason || null,
                 type: transaction.fromAccount?.user?.systemUser ? "INITIAL_FUNDING" : "TRANSFER",
                 from: {
                     accountName: transaction.fromAccount?.accountName || "Unavailable",
