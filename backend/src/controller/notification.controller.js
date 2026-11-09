@@ -24,7 +24,7 @@ async function getNotifications(req, res){
 
 async function markAllNotificationsAsRead(req, res){
     try {
-        await notificationModel.findOneAndUpdate(
+        await notificationModel.updateMany(
             {user:req.user._id, isRead:false},
             {$set:{isRead:true}})
         return res.status(200).json({ message: "All notifications marked as read" })

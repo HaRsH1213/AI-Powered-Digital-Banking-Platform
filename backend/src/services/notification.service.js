@@ -2,7 +2,7 @@ const notificationModel = require("../models/notification.model")
 const userModel = require("../models/user.model")
 
 const formatAmount = (amount)=> `₹${Number(amount).toLocaleString('en-IN')}`
-const userName = async(userId) => {
+const getUserName = async(userId) => {
     const user = await userModel.findById(userId)
     return user.name
 }
@@ -11,9 +11,9 @@ const userName = async(userId) => {
 const createCompletedTransferNotification = async({transaction, fromAccount, toAccount}) =>{
     const amount = Number(transaction.amount)
     const fromUserId = fromAccount.user.toString()
-    const fromUserName = await userName(fromUserId)
+    const fromUserName = await getUserName(fromUserId)
     const toUserId = toAccount.user.toString()
-    const toUserName = await userName(toUserId)
+    const toUserName = await getUserName(toUserId)
     if(fromUserId === toUserId){
         return notificationModel.create({
             user: fromUserId,
@@ -72,4 +72,15 @@ const createCreditTransferNotification = ({transaction, account}) =>{
     })
 }
 
-module.exports = {createCompletedTransferNotification, createFailedTransferNotification, createCreditTransferNotification}
+const createNewUserNotification = async (userId) => {
+    const name = await getUserName(userId)
+    return notificationModel.create({
+        user: userId,
+        category: "ACCOUNT",
+        type: "ACCOUNT_CREATED",
+        title: "Welcome to NovaBank!",
+        message: `Hello ${name}, welcome to our digital banking platform!`
+    })
+}
+
+module.exports = {createCompletedTransferNotification, createFailedTransferNotification, createCreditTransferNotification, createNewUserNotification}

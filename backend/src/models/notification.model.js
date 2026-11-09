@@ -15,12 +15,12 @@ const notificationSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ["ACCOUNT", "TRANSACTION", "SECURITY"],
+        enum: ["ACCOUNT","BANK", "TRANSACTION", "SECURITY"],
         required: true
     },
     type: {
         type: String,
-        enum: ["ACCOUNT_CREATED", "EMAIL_VERIFIED", "MONEY_CREDITED", "MONEY_DEBITED", "TRANSFER_COMPLETED", "TRANSFER_FAILED", "LOGIN_ALERT"],
+        enum: ["ACCOUNT_CREATED","BANK_ACCOUNT_CREATED", "EMAIL_VERIFIED", "MONEY_CREDITED", "MONEY_DEBITED", "TRANSFER_COMPLETED", "TRANSFER_FAILED", "LOGIN_ALERT"],
         required: true
     },
     title: {

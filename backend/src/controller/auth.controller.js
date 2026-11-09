@@ -4,6 +4,7 @@ const emailService = require("../services/email.service")
 const crypto = require("crypto")
 
 const tokenBlacklistModel = require("../models/blacklist.model")
+const notificationService = require("../services/notification.service")
 /**
  * - User register Controller
  * - POST /api/auth/register
@@ -60,7 +61,6 @@ async function registerUserController (req, res){
         secure: process.env.NODE_ENV === "production",
         maxAge: 30 * 60 * 1000
     })
-
     res.status(201).json({
         message: "User Registered Successfully",
         user :{
@@ -203,6 +203,13 @@ async function verifyEmailOtpController(req, res){
     user.emailVerificationOtpHash = undefined
     user.emailVerificationOtpExpiresAt = undefined
     await user.save()
+
+    // Notification for new user
+    try {
+        await notificationService.createNewUserNotification(user._id)
+    } catch (notificationError) {
+        console.error("Unable to create welcome notification", notificationError)
+    }
 
     // Send registration completion email
     await emailService.sendRegistrationEmail(user.email, user.name)
