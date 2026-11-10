@@ -1,22 +1,23 @@
 # NovaBank — Digital Banking Platform
 
-NovaBank is a full-stack digital banking project with separate React dashboards for customers and bank administrators, backed by an Express/MongoDB API. Customers can register, verify their email, manage accounts, review balances and transaction activity, and transfer money between accounts. Administrators can review customers and accounts, control account status, and add initial funds through a system funding account.
+NovaBank is a full-stack digital banking project with separate React dashboards for customers and bank administrators, backed by an Express/MongoDB API. Customers can register, verify their email, manage accounts, review ledger-based balances and transaction activity, transfer money between accounts, and receive in-app notifications. Administrators can review customers, accounts, and transactions; control account status; add initial funds through a system funding account; and investigate rejected or failed transfers.
 
 > This repository is a learning/prototype project. Do not use it to hold real funds or process real banking transactions.
 
 ## Features
 
-- Customer registration with email OTP verification and OTP resend
+- Customer registration with email OTP verification, OTP resend, and a welcome notification after verification
 - Secure sign-in, sign-out, session restoration, and role-based access control
 - Create and view Savings or Current accounts, with Savings, Salary, or Emergency account categories
 - Account numbers and branch IFSC details
 - Per-account and combined account balances calculated from ledger entries
 - Account-to-account transfers with idempotency-key handling and atomic MongoDB transactions
 - Double-entry ledger records for completed transfers: one debit and one credit entry
-- Transaction history with transfer status and counterparty details
-- In-app notifications for account activity, including marking notifications as read
-- Admin dashboard for customer review, account search/filtering, pagination, and account status management
+- Transaction history with transfer status, counterparty details, and rejected/failed reasons for outgoing transfers
+- In-app notifications for welcome, credit, debit, completed, and failed transfer events, including unread-count and mark-all-as-read support
+- Admin dashboard for customer review, account search/filtering, pagination, account status management, and transaction monitoring
 - Admin initial-funding flow that credits an active customer account from the active system funding account
+- Admin transaction page with search, status filters, pagination, and rejected/failed-reason details
 - Responsive dark interface built around the NovaBank navy and blue visual theme
 
 ## Transaction reliability
@@ -25,6 +26,21 @@ NovaBank is a full-stack digital banking project with separate React dashboards 
 - Each completed transfer writes matching debit and credit ledger entries inside a MongoDB transaction.
 - Transfers and initial funding use an idempotency key. Retrying the same request with the same details returns the original transaction instead of creating a duplicate payment.
 - Frozen and closed accounts cannot receive or send customer transfers. Admin initial funding is available only for active customer accounts.
+- Rejected transfers store a failure code and reason, such as insufficient balance or an inactive source/destination account. Unexpected processing errors are recorded as failed transactions.
+
+## How a transfer works
+
+```text
+Customer selects source account and enters recipient account number
+  -> frontend verifies the recipient and stores a pending transfer with an idempotency key
+  -> backend validates ownership, account status, and available balance
+  -> backend creates a PENDING transaction
+  -> MongoDB session writes matching DEBIT and CREDIT ledger entries
+  -> transaction becomes COMPLETED and the session commits
+  -> notifications are created for the affected customer(s)
+```
+
+If validation fails, the transfer is stored as `REJECTED` with a failure code and a human-readable reason. If an unexpected database-processing error occurs, it is stored as `FAILED`.
 
 ## Technology
 
@@ -135,12 +151,15 @@ Admin routes require an authenticated user with the `systemUser` role. The initi
 | `GET` | `/admin/customers/:customerId` | View a customer's account details |
 | `GET` | `/admin/accounts` | Search, filter, and paginate customer accounts |
 | `PATCH` | `/admin/accounts/:accountId/status` | Freeze or reactivate an eligible account |
+| `GET` | `/admin/transactions` | Search, filter, and paginate platform transactions, including failure details |
 | `POST` | `/transaction/system/initial-funds` | Credit initial funds to an active customer account |
 
 ## Planned work
 
 - ML-based credit-risk assessment for loan applications, using affordability and fraud-risk signals.
-- Additional admin workflows for loan review and transaction-risk monitoring.
+- Loan application, review, and approval workflows.
+- Transaction-risk monitoring and analytics.
+- Password reset, OTP resend cooldown, rate limiting, API tests, and production monitoring.
 
 ## Useful scripts
 
